@@ -347,6 +347,10 @@ export class PolyphonSidebarView extends ItemView {
       const session = await this.client.getSession(sessionId);
       this.activeSession = session;
       this.lastSentFilePath = null;
+      // Ensure activeComposition is set — may not be if session was resumed directly
+      if (!this.activeComposition || this.activeComposition.id !== session.compositionId) {
+        this.activeComposition = this.compositions.find((c) => c.id === session.compositionId) ?? this.activeComposition;
+      }
       this.conversationView?.clear();
       const messages = await this.client.sessionMessages(sessionId);
       for (const msg of messages) {
@@ -368,8 +372,11 @@ export class PolyphonSidebarView extends ItemView {
   }
 
   private async startNewSession(): Promise<void> {
-    const compositionId = this.compositionSelect?.value;
-    if (!compositionId) return;
+    const compositionId = this.activeComposition?.id ?? this.compositionSelect?.value;
+    if (!compositionId) {
+      new Notice("Polyphon: select a composition first.");
+      return;
+    }
     try {
       const vaultPath = (this.app.vault.adapter as { basePath?: string }).basePath ?? undefined;
       const vaultName = this.app.vault.getName();
