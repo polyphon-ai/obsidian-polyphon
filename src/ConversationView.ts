@@ -7,12 +7,10 @@ interface VoiceMessageState {
   color: string;
   wrapEl: HTMLElement;
   contentEl: HTMLElement;
+  headerDot: HTMLElement | null;
   status: "pending" | "streaming" | "done";
-  dotsEl: HTMLElement | null;
 }
 
-// Renders a unified chat thread where each message is labeled by voice.
-// No Obsidian imports — can be unit tested in isolation.
 export class ConversationView {
   private container: HTMLElement;
   private activeVoiceStates = new Map<string, VoiceMessageState>();
@@ -27,49 +25,30 @@ export class ConversationView {
   }
 
   appendUserMessage(content: string): void {
-    const el = this.container.createDiv({ cls: "polyphon-message polyphon-message--user" });
-    const labelRow = el.createDiv({ cls: "polyphon-message-label-row" });
-    labelRow.createSpan({ cls: "polyphon-message-label", text: "You" });
-    el.createDiv({ cls: "polyphon-message-content", text: content });
+    const el = this.container.createDiv({ cls: "pm pm--user" });
+    const avatar = el.createDiv({ cls: "pm__avatar pm__avatar--user" });
+    avatar.textContent = "You";
+    const body = el.createDiv({ cls: "pm__body" });
+    const header = body.createDiv({ cls: "pm__header" });
+    header.createSpan({ cls: "pm__name", text: "You" });
+    body.createDiv({ cls: "pm__bubble pm__bubble--user", text: content });
     this.scrollToBottom();
   }
 
   appendVoiceMessage(voiceId: string, voiceName: string, content: string, color: string): void {
-    const el = this.container.createDiv({ cls: "polyphon-message polyphon-message--voice" });
-    el.dataset.voiceId = voiceId;
-    const labelRow = el.createDiv({ cls: "polyphon-message-label-row" });
-    if (color) {
-      const dot = labelRow.createSpan({ cls: "polyphon-voice-dot" });
-      dot.style.backgroundColor = color;
-    }
-    labelRow.createSpan({ cls: "polyphon-message-label", text: voiceName });
-    el.createDiv({ cls: "polyphon-message-content", text: content });
+    const el = this.buildVoiceBubble(voiceId, voiceName, color, content, "done");
+    this.container.appendChild(el);
     this.scrollToBottom();
   }
 
-  // Creates pending placeholders for all voices immediately when a message is sent.
   showPending(voices: Voice[]): void {
     this.activeVoiceStates.clear();
     for (const voice of voices) {
-      const wrapEl = this.container.createDiv({
-        cls: "polyphon-message polyphon-message--voice polyphon-message--pending",
-      });
-      wrapEl.dataset.voiceId = voice.id;
+      const wrapEl = this.buildVoiceBubble(voice.id, voice.displayName, voice.color, null, "pending");
+      this.container.appendChild(wrapEl);
 
-      const labelRow = wrapEl.createDiv({ cls: "polyphon-message-label-row" });
-      const dot = labelRow.createSpan({ cls: "polyphon-voice-dot" });
-      dot.style.backgroundColor = voice.color;
-      labelRow.createSpan({ cls: "polyphon-message-label", text: voice.displayName });
-
-      const contentEl = wrapEl.createDiv({ cls: "polyphon-message-content polyphon-message-content--empty" });
-
-      // Thinking dots
-      const dotsEl = contentEl.createDiv({ cls: "polyphon-thinking-dots" });
-      for (let i = 0; i < 3; i++) {
-        const dot = dotsEl.createSpan({ cls: "polyphon-thinking-dot" });
-        dot.style.animationDelay = `${i * 0.15}s`;
-        dot.style.backgroundColor = voice.color;
-      }
+      const contentEl = wrapEl.querySelector(".pm__bubble") as HTMLElement;
+      const headerDot = wrapEl.querySelector(".pm__status-dot") as HTMLElement | null;
 
       this.activeVoiceStates.set(voice.id, {
         voiceId: voice.id,
@@ -77,38 +56,35 @@ export class ConversationView {
         color: voice.color,
         wrapEl,
         contentEl,
-        dotsEl,
+        headerDot,
         status: "pending",
       });
     }
     this.scrollToBottom();
   }
 
-  // Returns a StreamChunkHandler to pass directly to client.broadcast().
   createChunkHandler(): StreamChunkHandler {
     return ({ voiceId, voiceName, delta }) => {
       let state = this.activeVoiceStates.get(voiceId);
 
       if (!state) {
-        // Voice wasn't in the composition list — create it on the fly
-        const wrapEl = this.container.createDiv({
-          cls: "polyphon-message polyphon-message--voice polyphon-message--streaming",
-        });
-        wrapEl.dataset.voiceId = voiceId;
-        const labelRow = wrapEl.createDiv({ cls: "polyphon-message-label-row" });
-        labelRow.createSpan({ cls: "polyphon-message-label", text: voiceName });
-        const contentEl = wrapEl.createDiv({ cls: "polyphon-message-content" });
-        state = { voiceId, voiceName, color: "", wrapEl, contentEl, dotsEl: null, status: "streaming" };
+        const wrapEl = this.buildVoiceBubble(voiceId, voiceName, "", null, "streaming");
+        this.container.appendChild(wrapEl);
+        const contentEl = wrapEl.querySelector(".pm__bubble") as HTMLElement;
+        const headerDot = wrapEl.querySelector(".pm__status-dot") as HTMLElement | null;
+        state = { voiceId, voiceName, color: "", wrapEl, contentEl, headerDot, status: "streaming" };
         this.activeVoiceStates.set(voiceId, state);
       }
 
       if (state.status === "pending") {
-        // First chunk — remove thinking dots, transition to streaming
-        state.dotsEl?.remove();
-        state.dotsEl = null;
-        state.contentEl.removeClass("polyphon-message-content--empty");
-        state.wrapEl.removeClass("polyphon-message--pending");
-        state.wrapEl.addClass("polyphon-message--streaming");
+        state.wrapEl.removeClass("pm--pending");
+        state.wrapEl.addClass("pm--streaming");
+        state.contentEl.removeClass("pm__bubble--thinking");
+        state.contentEl.empty();
+        if (state.headerDot) {
+          state.headerDot.addClass("pm__status-dot--streaming");
+          state.headerDot.removeClass("pm__status-dot--pending");
+        }
         state.status = "streaming";
       }
 
@@ -117,24 +93,75 @@ export class ConversationView {
     };
   }
 
-  // Called after broadcast() resolves — removes streaming indicators.
   finalizeStreaming(): void {
     for (const state of this.activeVoiceStates.values()) {
-      // If still pending (voice never replied), remove thinking dots and show empty state
       if (state.status === "pending") {
-        state.dotsEl?.remove();
-        state.dotsEl = null;
-        state.contentEl.removeClass("polyphon-message-content--empty");
-        state.wrapEl.removeClass("polyphon-message--pending");
-        if (!state.contentEl.textContent) {
-          state.contentEl.addClass("polyphon-message-content--no-response");
+        state.wrapEl.removeClass("pm--pending");
+        state.contentEl.removeClass("pm__bubble--thinking");
+        if (!state.contentEl.textContent?.trim()) {
+          state.contentEl.addClass("pm__bubble--no-response");
           state.contentEl.textContent = "No response";
         }
       }
-      state.wrapEl.removeClass("polyphon-message--streaming");
+      state.wrapEl.removeClass("pm--streaming");
+      if (state.headerDot) {
+        state.headerDot.remove();
+      }
       state.status = "done";
     }
     this.activeVoiceStates.clear();
+  }
+
+  private buildVoiceBubble(
+    voiceId: string,
+    voiceName: string,
+    color: string,
+    content: string | null,
+    status: "pending" | "streaming" | "done"
+  ): HTMLElement {
+    const el = document.createElement("div");
+    el.className = `pm pm--voice pm--${status}`;
+    el.dataset.voiceId = voiceId;
+
+    // Avatar
+    const avatar = el.createDiv({ cls: "pm__avatar" });
+    avatar.textContent = voiceName.charAt(0).toUpperCase();
+    if (color) {
+      avatar.style.backgroundColor = `${color}25`;
+      avatar.style.color = color;
+    }
+
+    // Body
+    const body = el.createDiv({ cls: "pm__body" });
+    const header = body.createDiv({ cls: "pm__header" });
+    header.createSpan({ cls: "pm__name", text: voiceName });
+
+    if (status === "pending" || status === "streaming") {
+      const dot = header.createSpan({
+        cls: `pm__status-dot pm__status-dot--${status}`,
+      });
+      if (color) dot.style.backgroundColor = color;
+    }
+
+    // Bubble
+    const bubbleCls = status === "pending"
+      ? "pm__bubble pm__bubble--thinking"
+      : "pm__bubble";
+    const bubble = body.createDiv({ cls: bubbleCls });
+    if (color) bubble.style.borderLeftColor = color;
+
+    if (status === "pending") {
+      // Thinking dots
+      for (let i = 0; i < 3; i++) {
+        const dot = bubble.createSpan({ cls: "pm__thinking-dot" });
+        dot.style.animationDelay = `${i * 0.15}s`;
+        if (color) dot.style.backgroundColor = color;
+      }
+    } else if (content) {
+      bubble.textContent = content;
+    }
+
+    return el;
   }
 
   private scrollToBottom(): void {
