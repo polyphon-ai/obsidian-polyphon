@@ -94,12 +94,14 @@
 }
 
 
-/* Conductor messages align right */
-.pm--user {
+/* Right-side messages (conductor + right-assigned voices) */
+.pm--user,
+.pm--right {
   align-items: flex-end;
 }
 
-.pm--user .pm__header {
+.pm--user .pm__header,
+.pm--right .pm__header {
   flex-direction: row-reverse;
 }
 
@@ -168,6 +170,7 @@
   background: var(--background-secondary);
   border-radius: var(--radius-m);
   border-left: 3px solid var(--background-modifier-border);
+  border-right: none;
   padding: 7px 10px;
   white-space: pre-wrap;
   word-break: break-word;
@@ -176,6 +179,11 @@
   color: var(--text-normal);
   width: 100%;
   box-sizing: border-box;
+}
+
+.pm--right .pm__bubble {
+  border-left: none;
+  border-right: 3px solid var(--background-modifier-border);
 }
 
 

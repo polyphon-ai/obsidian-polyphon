@@ -353,9 +353,10 @@ export class PolyphonSidebarView extends ItemView {
         if (msg.role === "conductor") {
           this.conversationView?.appendUserMessage(msg.content);
         } else if (msg.role === "voice" && msg.voiceId && msg.voiceName) {
+          const voice = this.activeComposition?.voices.find((v) => v.id === msg.voiceId);
           this.conversationView?.appendVoiceMessage(
             msg.voiceId, msg.voiceName, msg.content,
-            this.activeComposition?.voices.find((v) => v.id === msg.voiceId)?.color ?? ""
+            voice?.color ?? "", voice?.side ?? "left"
           );
         }
       }

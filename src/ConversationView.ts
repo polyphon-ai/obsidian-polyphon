@@ -48,12 +48,13 @@ export class ConversationView {
     avatar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>`;
     header.createSpan({ cls: "pm__name", text: name });
     const bubble = body.createDiv({ cls: "pm__bubble", text: content });
-    bubble.style.borderLeftColor = color;
+    bubble.style.borderLeftColor = "transparent";
+    bubble.style.borderRightColor = color;
     this.scrollToBottom();
   }
 
-  appendVoiceMessage(voiceId: string, voiceName: string, content: string, color: string): void {
-    const el = this.buildVoiceBubble(voiceId, voiceName, color, content, "done");
+  appendVoiceMessage(voiceId: string, voiceName: string, content: string, color: string, side: "left" | "right" = "left"): void {
+    const el = this.buildVoiceBubble(voiceId, voiceName, color, content, "done", side);
     this.container.appendChild(el);
     this.scrollToBottom();
   }
@@ -61,7 +62,7 @@ export class ConversationView {
   showPending(voices: Voice[]): void {
     this.activeVoiceStates.clear();
     for (const voice of voices) {
-      const wrapEl = this.buildVoiceBubble(voice.id, voice.displayName, voice.color, null, "pending");
+      const wrapEl = this.buildVoiceBubble(voice.id, voice.displayName, voice.color, null, "pending", voice.side);
       this.container.appendChild(wrapEl);
 
       const contentEl = wrapEl.querySelector(".pm__bubble") as HTMLElement;
@@ -134,10 +135,11 @@ export class ConversationView {
     voiceName: string,
     color: string,
     content: string | null,
-    status: "pending" | "streaming" | "done"
+    status: "pending" | "streaming" | "done",
+    side: "left" | "right" = "left"
   ): HTMLElement {
     const el = document.createElement("div");
-    el.className = `pm pm--voice pm--${status}`;
+    el.className = `pm pm--voice pm--${status} pm--${side}`;
     el.dataset.voiceId = voiceId;
 
     // Body
@@ -166,7 +168,14 @@ export class ConversationView {
       ? "pm__bubble pm__bubble--thinking"
       : "pm__bubble";
     const bubble = body.createDiv({ cls: bubbleCls });
-    if (color) bubble.style.borderLeftColor = color;
+    if (color) {
+      if (side === "right") {
+        bubble.style.borderLeftColor = "transparent";
+        bubble.style.borderRightColor = color;
+      } else {
+        bubble.style.borderLeftColor = color;
+      }
+    }
 
     if (status === "pending") {
       // Thinking dots

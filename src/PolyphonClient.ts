@@ -102,7 +102,12 @@ export class PolyphonClient extends EventEmitter {
   // ---- API methods ----
 
   async compositions(): Promise<Composition[]> {
-    return this.call<Composition[]>("compositions.list", {});
+    const comps = await this.call<Composition[]>("compositions.list", {});
+    // Assign sides to voices matching Polyphon's SessionView logic (index % 2)
+    return comps.map((c) => ({
+      ...c,
+      voices: c.voices.map((v, i) => ({ ...v, side: (i % 2 === 0 ? "left" : "right") as "left" | "right" })),
+    }));
   }
 
   async getComposition(id: string): Promise<Composition> {

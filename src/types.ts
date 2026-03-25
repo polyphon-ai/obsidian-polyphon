@@ -58,6 +58,7 @@ export interface Voice {
   displayName: string;
   color: string;
   avatarIcon: string;
+  side: "left" | "right";
 }
 
 export interface Session {
