@@ -24,10 +24,12 @@ Open **Settings → Polyphon** to configure:
 | Setting | Default | Description |
 |---------|---------|-------------|
 | Host | `127.0.0.1` | Hostname or IP of your Polyphon instance |
-| Port | `51234` | TCP port Polyphon is listening on |
-| API token | _(blank)_ | Token from Polyphon's API settings |
+| Port | `7432` | TCP port Polyphon is listening on |
+| API token | _(auto)_ | Use **Read local token** to load from the running instance, or paste manually |
 | Persist conversations | Off | Save and restore history across restarts |
 | Debug mode | Off | Log raw JSON-RPC frames to the console |
+
+The API token is stored in `~/Library/Application Support/Polyphon/api.key` on macOS (or the platform equivalent). The **Read local token** button in settings loads it automatically.
 
 ## Usage
 
