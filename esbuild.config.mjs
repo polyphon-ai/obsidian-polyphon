@@ -11,7 +11,7 @@ If you want to view the source, please visit the GitHub repository.
 
 const prod = process.argv[2] === "production";
 
-const VAULT_PLUGIN_DIR = "vault/.obsidian/plugins/obsidian-ai-agent-sidebar";
+const VAULT_PLUGIN_DIR = "vault/.obsidian/plugins/polyphon";
 
 function syncToVault() {
   if (!existsSync(VAULT_PLUGIN_DIR)) return;

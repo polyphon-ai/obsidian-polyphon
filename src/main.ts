@@ -1,99 +1,64 @@
 import { Plugin } from "obsidian";
-import { AgentDetector } from "./AgentDetector";
-import { AGENT_ADAPTERS } from "./AgentRunner";
-import { AgentSidebarView, AGENT_SIDEBAR_VIEW_TYPE } from "./AgentSidebarView";
-import { AgentSidebarSettingTab, DEFAULT_SETTINGS } from "./settings";
+import { PolyphonClient } from "./PolyphonClient";
+import { PolyphonSidebarView, POLYPHON_SIDEBAR_VIEW_TYPE } from "./PolyphonSidebarView";
+import { DEFAULT_SETTINGS, PolyphonSettingTab } from "./settings";
 import type { PluginSettings } from "./types";
 
-export default class AgentSidebarPlugin extends Plugin {
-  settings: PluginSettings = DEFAULT_SETTINGS;
-  agentDetector: AgentDetector = new AgentDetector();
+export default class PolyphonPlugin extends Plugin {
+  settings: PluginSettings = { ...DEFAULT_SETTINGS };
+  client: PolyphonClient = new PolyphonClient(this.settings);
 
   async onload(): Promise<void> {
     await this.loadSettings();
+    this.client = new PolyphonClient(this.settings);
 
-    // Detect installed agents
-    await this.agentDetector.detect(AGENT_ADAPTERS);
-
-    // Register the sidebar view
     this.registerView(
-      AGENT_SIDEBAR_VIEW_TYPE,
-      (leaf) => new AgentSidebarView(leaf, this)
+      POLYPHON_SIDEBAR_VIEW_TYPE,
+      (leaf) => new PolyphonSidebarView(leaf, this)
     );
 
-    // Ribbon icon
-    this.addRibbonIcon("bot", "Open AI agent sidebar", () => {
+    this.addRibbonIcon("message-square", "Open Polyphon", () => {
       void this.activateSidebar();
     });
 
-    // Command palette entry
     this.addCommand({
       id: "open",
       name: "Open sidebar",
-      callback: () => {
-        void this.activateSidebar();
-      },
+      callback: () => void this.activateSidebar(),
     });
 
-    // Settings tab
-    this.addSettingTab(new AgentSidebarSettingTab(this.app, this));
-  }
-
-  /** Retrieve the active sidebar view without storing a stale reference. */
-  getAgentSidebarView(): AgentSidebarView | null {
-    const leaf = this.app.workspace.getLeavesOfType(AGENT_SIDEBAR_VIEW_TYPE)[0];
-    return leaf?.view instanceof AgentSidebarView ? leaf.view : null;
+    this.addSettingTab(new PolyphonSettingTab(this.app, this));
   }
 
   onunload(): void {
-    // AgentChatTab.destroy() disposes runners (kills child processes)
-    // AgentSidebarView.onClose() calls destroyAllTabs()
-    // Nothing extra needed here since view lifecycle handles it
+    this.client.disconnect();
+  }
+
+  getSidebarView(): PolyphonSidebarView | null {
+    const leaf = this.app.workspace.getLeavesOfType(POLYPHON_SIDEBAR_VIEW_TYPE)[0];
+    return leaf?.view instanceof PolyphonSidebarView ? leaf.view : null;
   }
 
   async loadSettings(): Promise<void> {
-    const saved = await this.loadData() as Partial<PluginSettings> | null;
+    const saved = (await this.loadData()) as Partial<PluginSettings> | null;
     this.settings = Object.assign({}, DEFAULT_SETTINGS, saved);
-
-    // Ensure all agent configs exist and have required fields (migration from SPRINT-001)
-    const agentIds: Array<keyof typeof this.settings.agents> = ["claude", "codex", "gemini", "copilot", "openai-compat"];
-    const defaultAccessModes: Record<string, "cli" | "api"> = {
-      claude: "cli", codex: "cli", gemini: "api", copilot: "cli", "openai-compat": "api",
-    };
-    for (const id of agentIds) {
-      if (!this.settings.agents[id]) {
-        this.settings.agents[id] = { enabled: false, extraArgs: "", yoloMode: false, accessMode: defaultAccessModes[id] ?? "cli" };
-      } else {
-        // Migrate: add accessMode if missing
-        if (!this.settings.agents[id].accessMode) {
-          this.settings.agents[id].accessMode = id === "gemini" ? "api" : "cli";
-        }
-        // Migrate: if gemini or openai-compat was set to CLI mode, switch to api
-        if ((id === "gemini" || id === "openai-compat") && this.settings.agents[id].accessMode === "cli") {
-          this.settings.agents[id].accessMode = "api";
-        }
-        // Migrate: add yoloMode if missing
-        if (this.settings.agents[id].yoloMode === undefined) {
-          this.settings.agents[id].yoloMode = false;
-        }
-      }
-    }
   }
 
   async saveSettings(): Promise<void> {
     await this.saveData(this.settings);
+    // Reconnect with updated config
+    this.client.disconnect();
+    this.client = new PolyphonClient(this.settings);
+    this.getSidebarView()?.onClientReplaced(this.client);
   }
 
   private async activateSidebar(): Promise<void> {
     const { workspace } = this.app;
-
-    let leaf = workspace.getLeavesOfType(AGENT_SIDEBAR_VIEW_TYPE)[0];
-
+    let leaf = workspace.getLeavesOfType(POLYPHON_SIDEBAR_VIEW_TYPE)[0];
     if (!leaf) {
       leaf = workspace.getRightLeaf(false) ?? workspace.getLeaf(true);
-      await leaf.setViewState({ type: AGENT_SIDEBAR_VIEW_TYPE, active: true });
+      await leaf.setViewState({ type: POLYPHON_SIDEBAR_VIEW_TYPE, active: true });
     }
-
     await workspace.revealLeaf(leaf);
   }
 }

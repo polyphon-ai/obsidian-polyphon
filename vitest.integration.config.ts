@@ -4,9 +4,7 @@ import { resolve } from "path";
 export default defineConfig({
   resolve: {
     alias: {
-      // The 'obsidian' package ships only type declarations (main: "").
-      // Redirect all runtime imports to our stub so Vitest can resolve them.
-      obsidian: resolve(__dirname, "tests/integration/helpers/obsidianStub.ts"),
+      obsidian: resolve(__dirname, "tests/helpers/obsidianStub.ts"),
     },
   },
   test: {

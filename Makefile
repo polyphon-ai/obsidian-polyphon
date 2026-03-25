@@ -1,11 +1,11 @@
-PLUGIN_ID        := obsidian-ai-agent-sidebar
+PLUGIN_ID        := polyphon
 VAULT_DIR        := vault
 VAULT_PLUGIN_DIR := $(VAULT_DIR)/.obsidian/plugins/$(PLUGIN_ID)
 HOT_RELOAD_DIR   := $(VAULT_DIR)/.obsidian/plugins/hot-reload
 HOT_RELOAD_VER   := 0.3.0
 HOT_RELOAD_BASE  := https://github.com/pjeby/hot-reload/releases/download/$(HOT_RELOAD_VER)
 
-.PHONY: dev vault-setup build install clean test test-unit test-integration test-e2e test-e2e-live test-e2e-openai-compatible lint help
+.PHONY: dev vault-setup build clean test test-unit test-integration lint help
 
 dev: vault-setup
 	@echo "Starting watcher — changes to src/ will sync to $(VAULT_PLUGIN_DIR) automatically."
@@ -19,32 +19,20 @@ vault-setup: clean build
 	curl -fsSL $(HOT_RELOAD_BASE)/main.js -o $(HOT_RELOAD_DIR)/main.js
 	curl -fsSL $(HOT_RELOAD_BASE)/manifest.json -o $(HOT_RELOAD_DIR)/manifest.json
 	touch $(VAULT_PLUGIN_DIR)/.hotreload
-	@printf '# AI Agent Sidebar — Test Vault\n\nThis is a sample vault for testing the AI Agent Sidebar plugin.\n\nOpen the sidebar using the bot icon in the ribbon or via the command palette: **Open AI Agent Sidebar**.\n\n## Sample Notes\n\n- [[Meeting Notes]]\n- [[Project Ideas]]\n' > "$(VAULT_DIR)/Welcome.md"
-	@printf '# Meeting Notes\n\n## 2026-03-07 — Project Kickoff\n\n**Attendees**: Engineering team\n\n**Topics**:\n- Reviewed project scope for AI Agent Sidebar plugin\n- Decided to support Claude Code, Codex, Gemini, and Copilot CLI\n- Agreed on :::file-op protocol for structured vault operations\n\n**Action Items**:\n- [ ] Set up dev vault for testing\n- [ ] Install at least one CLI agent\n- [ ] Test end-to-end flow with Claude Code\n' > "$(VAULT_DIR)/Meeting Notes.md"
-	@printf '# Project Ideas\n\nA scratch pad for testing the AI agent'\''s read/write capabilities.\n\n## Ideas to Explore\n\n- Ask the agent to summarize Meeting Notes\n- Ask the agent to create a new note\n- Ask the agent to add items to this list\n' > "$(VAULT_DIR)/Project Ideas.md"
+	@printf '# Polyphon — Test Vault\n\nThis is a sample vault for testing the Polyphon plugin.\n\nOpen the sidebar using the icon in the ribbon or via the command palette: **Polyphon: Open sidebar**.\n\nMake sure Polyphon is running before opening the sidebar.\n' > "$(VAULT_DIR)/Welcome.md"
 	cp main.js manifest.json styles.css $(VAULT_PLUGIN_DIR)/
 	@echo "Vault ready. Open vault/ in Obsidian to test."
 
 build:
 	npm run build
 
-test: test-unit test-integration test-e2e
+test: test-unit test-integration
 
 test-unit:
-	npm test
 	npm run test-unit
 
 test-integration:
 	npm run test-integration
-
-test-e2e: build
-	npm run test-e2e
-
-test-e2e-live: build
-	npm run test-e2e-live
-
-test-e2e-openai-compatible: build
-	npm run test-e2e-openai-compatible
 
 lint:
 	npm run lint
@@ -59,12 +47,9 @@ help:
 	@echo "Targets:"
 	@echo "  dev               Build and start watch mode with hot-reload vault"
 	@echo "  build             Type-check and bundle (production)"
-	@echo "  test              Run unit, integration, and e2e tests"
-	@echo "  test-unit         Run unit tests"
-	@echo "  test-integration  Run integration tests"
-	@echo "  test-e2e          Run e2e tests (mock servers)"
-	@echo "  test-e2e-live              Run live E2E tests (requires real CLIs + API keys, NOT part of make test)"
-	@echo "  test-e2e-openai-compatible Run live E2E tests for openai-compat agent (requires Docker)"
+	@echo "  test              Run unit and integration tests"
+	@echo "  test-unit         Run unit tests only"
+	@echo "  test-integration  Run integration tests (requires a running Polyphon instance)"
 	@echo "  lint              Lint source files"
 	@echo "  vault-setup       Create sample Obsidian vault with plugin installed"
 	@echo "  clean             Remove build output and vault directory"

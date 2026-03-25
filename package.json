@@ -1,7 +1,7 @@
 {
-  "name": "obsidian-ai-agent-sidebar",
-  "version": "0.4.0",
-  "description": "Obsidian plugin that adds an AI agent chat sidebar with vault CRUD capabilities",
+  "name": "obsidian-polyphon",
+  "version": "0.1.0",
+  "description": "Obsidian plugin that connects to a running Polyphon instance for multi-voice AI conversations",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",
@@ -10,19 +10,14 @@
     "test": "vitest run",
     "test-unit": "vitest run --config vitest.unit.config.ts",
     "test-integration": "vitest run --config vitest.integration.config.ts",
-    "test-e2e": "vitest run --config vitest.e2e.config.ts",
-    "test-e2e-live": "vitest run --config vitest.e2e-live.config.ts",
-    "test-e2e-openai-compatible": "vitest run --config vitest.e2e-openai-compatible.config.ts",
     "lint": "eslint src"
   },
   "keywords": [
     "obsidian",
     "ai",
     "plugin",
-    "claude",
-    "codex",
-    "gemini",
-    "copilot"
+    "polyphon",
+    "multi-voice"
   ],
   "author": "Corey Daley",
   "license": "MIT",
@@ -36,14 +31,9 @@
     "eslint-plugin-obsidianmd": "^0.1.9",
     "jsdom": "^28.1.0",
     "obsidian": "latest",
-    "playwright": "1.58.2",
     "tslib": "^2.4.0",
     "typescript": "^5.0.4",
     "vitest": "^4.0.18"
   },
-  "dependencies": {
-    "@anthropic-ai/sdk": "0.78.0",
-    "@google/generative-ai": "0.24.1",
-    "openai": "6.27.0"
-  }
+  "dependencies": {}
 }
