@@ -147,7 +147,6 @@
 .polyphon-btn--send:hover { background: var(--interactive-accent-hover); }
 
 .polyphon-btn--retry { font-size: var(--font-ui-smaller); padding: 2px 8px; }
-.polyphon-btn--icon  { padding: 2px 8px; font-size: 1.2em; line-height: 1; }
 
 /* ---- Voice label row ---- */
 .polyphon-message-label-row {

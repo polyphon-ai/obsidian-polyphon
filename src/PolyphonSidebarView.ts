@@ -64,10 +64,6 @@ export class PolyphonSidebarView extends ItemView {
     this.compositionSelect.createEl("option", { text: "— select a composition —", attr: { value: "" } });
     this.compositionSelect.addEventListener("change", () => void this.onCompositionSelected());
 
-    const newSessionBtn = topBar.createEl("button", { cls: "polyphon-btn polyphon-btn--icon", text: "+" });
-    newSessionBtn.title = "New session";
-    newSessionBtn.addEventListener("click", () => void this.startNewSession());
-
     // Conversation area
     const conversationEl = root.createDiv({ cls: "polyphon-conversation" });
     this.conversationView = new ConversationView(conversationEl);
