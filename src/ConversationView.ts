@@ -1,4 +1,4 @@
-import type { PolyphonClient, StreamChunkHandler } from "./PolyphonClient";
+import type { StreamChunkHandler } from "./PolyphonClient";
 
 interface VoiceStream {
   voiceId: string;
@@ -29,19 +29,10 @@ export class ConversationView {
     this.scrollToBottom();
   }
 
-  appendVoiceMessage(voiceId: string, voiceName: string, content: string): void {
-    const el = this.container.createDiv({ cls: "polyphon-message polyphon-message--voice" });
-    el.dataset.voiceId = voiceId;
-    el.createDiv({ cls: "polyphon-message-label", text: voiceName });
-    el.createDiv({ cls: "polyphon-message-content", text: content });
-    this.scrollToBottom();
-  }
-
-  // Returns a StreamChunkHandler that progressively renders incoming deltas.
-  // The caller is responsible for registering it with client.onStreamChunk()
-  // and deregistering it after the broadcast resolves.
-  getStreamHandler(client: PolyphonClient): StreamChunkHandler {
-    const handler: StreamChunkHandler = ({ voiceId, voiceName, delta }) => {
+  // Returns a StreamChunkHandler to pass directly to client.broadcast().
+  // Progressively renders incoming deltas per voice.
+  createChunkHandler(): StreamChunkHandler {
+    return ({ voiceId, voiceName, delta }) => {
       let stream = this.activeStreams.get(voiceId);
       if (!stream) {
         const el = this.container.createDiv({ cls: "polyphon-message polyphon-message--voice polyphon-message--streaming" });
@@ -54,11 +45,9 @@ export class ConversationView {
       stream.contentEl.textContent = (stream.contentEl.textContent ?? "") + delta;
       this.scrollToBottom();
     };
-    client.onStreamChunk(handler);
-    return handler;
   }
 
-  // Cleans up streaming state after a broadcast completes.
+  // Called after broadcast() resolves — removes streaming indicators.
   finalizeStreaming(): void {
     for (const stream of this.activeStreams.values()) {
       stream.el.removeClass("polyphon-message--streaming");

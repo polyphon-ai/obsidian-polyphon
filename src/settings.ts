@@ -1,9 +1,10 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { App, Notice, PluginSettingTab, Setting } from "obsidian";
 import type PolyphonPlugin from "./main";
+import { readLocalToken } from "./PolyphonClient";
 
 export const DEFAULT_SETTINGS = {
   host: "127.0.0.1",
-  port: 51234,
+  port: 7432,
   token: "",
   persistConversations: false,
   debugMode: false,
@@ -42,7 +43,7 @@ export class PolyphonSettingTab extends PluginSettingTab {
       .setDesc("TCP port Polyphon is listening on.")
       .addText((text) =>
         text
-          .setPlaceholder("51234")
+          .setPlaceholder("7432")
           .setValue(String(this.plugin.settings.port))
           .onChange(async (value) => {
             const port = parseInt(value, 10);
@@ -55,17 +56,33 @@ export class PolyphonSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("API token")
-      .setDesc("Token from Polyphon's API settings. Leave blank if authentication is disabled.")
+      .setDesc("Token from Polyphon's API settings. Use 'Read local token' to auto-fill from the running instance.")
       .addText((text) => {
         text.inputEl.type = "password";
         text
-          .setPlaceholder("polyphon_...")
+          .setPlaceholder("auto-detected from local install")
           .setValue(this.plugin.settings.token)
           .onChange(async (value) => {
             this.plugin.settings.token = value;
             await this.plugin.saveSettings();
           });
-      });
+      })
+      .addButton((btn) =>
+        btn
+          .setButtonText("Read local token")
+          .setTooltip("Load token from ~/Library/Application Support/Polyphon/api.key")
+          .onClick(async () => {
+            try {
+              const token = readLocalToken();
+              this.plugin.settings.token = token;
+              await this.plugin.saveSettings();
+              this.display(); // re-render to show updated value
+              new Notice("Polyphon: token loaded from local install.");
+            } catch (err) {
+              new Notice(`Polyphon: could not read token — is Polyphon running? (${String(err)})`);
+            }
+          })
+      );
 
     new Setting(containerEl).setHeading().setName("Options");
 

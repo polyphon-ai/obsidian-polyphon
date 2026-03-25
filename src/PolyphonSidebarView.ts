@@ -178,18 +178,16 @@ export class PolyphonSidebarView extends ItemView {
     this.conversationView?.appendUserMessage(content);
     this.setSendEnabled(false);
 
-    // Register streaming handler before the call
-    const streamHandler = this.conversationView?.getStreamHandler(this.client);
+    const onChunk = this.conversationView?.createChunkHandler();
 
     try {
-      await this.client.broadcast(this.activeSession.id, content, true);
+      await this.client.broadcast(this.activeSession.id, content, onChunk);
     } catch (err) {
       new Notice("Polyphon: failed to send message.");
       if (this.plugin.settings.debugMode) console.error("[Polyphon]", err);
     } finally {
-      if (streamHandler) this.client.offStreamChunk(streamHandler);
-      this.setSendEnabled(true);
       this.conversationView?.finalizeStreaming();
+      this.setSendEnabled(true);
     }
   }
 }
