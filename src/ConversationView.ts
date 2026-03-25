@@ -63,17 +63,21 @@ export class ConversationView {
     return el;
   }
 
-  showConductorPending(): void {
+  showConductorTyping(): void {
+    // Only show once
+    if (this.container.querySelector("[data-conductor-typing]")) return;
     const el = this.buildConductorBubble(null);
-    el.dataset.conductorPending = "1";
+    el.dataset.conductorTyping = "1";
     this.container.appendChild(el);
     this.scrollToBottom();
   }
 
+  hideConductorTyping(): void {
+    this.container.querySelector("[data-conductor-typing]")?.remove();
+  }
+
   appendUserMessage(content: string): void {
-    // Remove pending dots if present
-    const pending = this.container.querySelector("[data-conductor-pending]");
-    if (pending) pending.remove();
+    this.hideConductorTyping();
     const el = this.buildConductorBubble(content);
     this.container.appendChild(el);
     this.scrollToBottom();
