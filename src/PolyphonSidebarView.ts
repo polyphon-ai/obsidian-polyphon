@@ -85,10 +85,10 @@ export class PolyphonSidebarView extends ItemView {
     const inputArea = root.createDiv({ cls: "polyphon-input-area" });
     this.inputEl = inputArea.createEl("textarea", {
       cls: "polyphon-input",
-      attr: { placeholder: "Message all voices…", rows: "3" },
+      attr: { placeholder: "Message all voices… (Shift+Enter for newline)", rows: "3" },
     });
     this.inputEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+      if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         void this.sendMessage();
       }
