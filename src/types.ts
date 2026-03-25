@@ -64,16 +64,23 @@ export interface Session {
   id: string;
   compositionId: string;
   name: string;
+  mode: "conductor" | "broadcast";
+  createdAt: number;
+  updatedAt: number;
+  archived: boolean;
+  workingDir: string | null;
+  sandboxedToWorkingDir: boolean;
 }
 
 export interface Message {
   id: string;
   sessionId: string;
-  voiceId: string;
-  voiceName: string;
-  role: "user" | "assistant";
+  voiceId: string | null;
+  voiceName: string | null;
+  role: "conductor" | "voice" | "system";
   content: string;
-  createdAt: number;
+  timestamp: number;
+  roundIndex: number;
 }
 
 // ---- Plugin settings ----

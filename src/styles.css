@@ -31,7 +31,44 @@
 
 .polyphon-status-label { color: var(--text-muted); flex: 1; }
 
-/* ---- Top bar ---- */
+/* ---- Select (shared) ---- */
+.polyphon-select {
+  flex: 1;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  padding: 4px 6px;
+  color: var(--text-normal);
+  font-size: var(--font-ui-small);
+}
+
+/* ---- Session row ---- */
+.polyphon-session-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.polyphon-session-row--hidden { display: none; }
+
+/* ---- Session header ---- */
+.polyphon-session-header {
+  padding: 4px 10px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  background: var(--background-secondary);
+}
+
+.polyphon-session-header--hidden { display: none; }
+
+.polyphon-session-name {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+
 .polyphon-top-bar {
   display: flex;
   align-items: center;
@@ -147,6 +184,7 @@
 .polyphon-btn--send:hover { background: var(--interactive-accent-hover); }
 
 .polyphon-btn--retry { font-size: var(--font-ui-smaller); padding: 2px 8px; }
+.polyphon-btn--new   { font-size: var(--font-ui-smaller); padding: 2px 10px; white-space: nowrap; }
 
 /* ---- Voice label row ---- */
 .polyphon-message-label-row {

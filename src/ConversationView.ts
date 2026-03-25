@@ -34,6 +34,19 @@ export class ConversationView {
     this.scrollToBottom();
   }
 
+  appendVoiceMessage(voiceId: string, voiceName: string, content: string, color: string): void {
+    const el = this.container.createDiv({ cls: "polyphon-message polyphon-message--voice" });
+    el.dataset.voiceId = voiceId;
+    const labelRow = el.createDiv({ cls: "polyphon-message-label-row" });
+    if (color) {
+      const dot = labelRow.createSpan({ cls: "polyphon-voice-dot" });
+      dot.style.backgroundColor = color;
+    }
+    labelRow.createSpan({ cls: "polyphon-message-label", text: voiceName });
+    el.createDiv({ cls: "polyphon-message-content", text: content });
+    this.scrollToBottom();
+  }
+
   // Creates pending placeholders for all voices immediately when a message is sent.
   showPending(voices: Voice[]): void {
     this.activeVoiceStates.clear();

@@ -108,12 +108,21 @@ export class PolyphonClient extends EventEmitter {
     return this.call<Composition>("compositions.get", { id });
   }
 
+  async getSession(id: string): Promise<Session> {
+    return this.call<Session>("sessions.get", { id });
+  }
+
+  async sessions(compositionId?: string): Promise<Session[]> {
+    const all = await this.call<Session[]>("sessions.list", {});
+    return compositionId ? all.filter((s) => s.compositionId === compositionId) : all;
+  }
+
   async createSession(compositionId: string, name?: string, workingDir?: string): Promise<Session> {
     return this.call<Session>("sessions.create", { compositionId, name, workingDir: workingDir ?? null });
   }
 
-  async getSession(id: string): Promise<Session> {
-    return this.call<Session>("sessions.get", { id });
+  async renameSession(id: string, name: string): Promise<Session> {
+    return this.call<Session>("sessions.rename", { id, name });
   }
 
   async sessionMessages(sessionId: string): Promise<Message[]> {
