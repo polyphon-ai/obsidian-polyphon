@@ -291,6 +291,7 @@ export class PolyphonSidebarView extends ItemView {
     } finally {
       this.conversationView?.finalizeStreaming();
       this.setSendEnabled(true);
+      this.inputEl?.focus();
     }
   }
 }
