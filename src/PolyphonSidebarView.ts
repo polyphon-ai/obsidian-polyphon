@@ -20,6 +20,7 @@ export class PolyphonSidebarView extends ItemView {
   private compositions: Composition[] = [];
   private activeComposition: Composition | null = null;
   private activeSession: Session | null = null;
+  private lastSentFilePath: string | null = null;
 
   constructor(leaf: WorkspaceLeaf, plugin: PolyphonPlugin) {
     super(leaf);
@@ -167,6 +168,7 @@ export class PolyphonSidebarView extends ItemView {
     try {
       const vaultPath = (this.app.vault.adapter as { basePath?: string }).basePath ?? undefined;
       this.activeSession = await this.client.createSession(id, undefined, vaultPath);
+      this.lastSentFilePath = null;
       this.conversationView?.clear();
       this.setSendEnabled(true);
     } catch {
@@ -181,6 +183,15 @@ export class PolyphonSidebarView extends ItemView {
     if (!content || !this.activeSession) return;
     if (this.inputEl) this.inputEl.value = "";
 
+    // Prepend current file path if it changed since the last message
+    const activeFile = this.app.workspace.getActiveFile();
+    const vaultBase = (this.app.vault.adapter as { basePath?: string }).basePath ?? "";
+    const currentPath = activeFile ? `${vaultBase}/${activeFile.path}` : null;
+    const messageContent = (currentPath && currentPath !== this.lastSentFilePath)
+      ? `> Current file: ${currentPath}\n\n${content}`
+      : content;
+    if (currentPath) this.lastSentFilePath = currentPath;
+
     this.conversationView?.appendUserMessage(content);
 
     // Show pending placeholders for all voices immediately
@@ -192,7 +203,7 @@ export class PolyphonSidebarView extends ItemView {
     const onChunk = this.conversationView?.createChunkHandler();
 
     try {
-      await this.client.broadcast(this.activeSession.id, content, onChunk);
+      await this.client.broadcast(this.activeSession.id, messageContent, onChunk);
     } catch (err) {
       new Notice("Polyphon: failed to send message.");
       if (this.plugin.settings.debugMode) console.error("[Polyphon]", err);
