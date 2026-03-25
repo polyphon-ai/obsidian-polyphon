@@ -107,7 +107,6 @@
 
 .pm--user .pm__bubble {
   border-left: none;
-  border-right: 3px solid var(--interactive-accent);
 }
 
 /* ---- Avatar ---- */
@@ -191,8 +190,7 @@
   line-height: 1.5;
   font-size: var(--font-ui-small);
   color: var(--text-normal);
-  width: fit-content;
-  max-width: 100%;
+  width: 100%;
   box-sizing: border-box;
 }
 
@@ -200,10 +198,10 @@
   background: var(--interactive-accent);
   color: var(--text-on-accent);
   border-left: none;
-  border-right: 3px solid var(--color-accent-2, var(--interactive-accent));
+  border-right: none;
   border-radius: var(--radius-m);
   width: fit-content;
-  max-width: 100%;
+  max-width: 85%;
 }
 
 /* Streaming cursor */
