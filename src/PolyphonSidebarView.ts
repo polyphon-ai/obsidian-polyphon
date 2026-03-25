@@ -379,6 +379,8 @@ export class PolyphonSidebarView extends ItemView {
       }
       this.renderSessionHeader(session);
       this.setSendEnabled(true);
+      // Defer final scroll to after layout completes
+      requestAnimationFrame(() => this.conversationView?.scrollToBottom());
     } catch {
       new Notice("Polyphon: failed to resume session.");
     }

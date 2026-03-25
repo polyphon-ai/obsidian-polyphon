@@ -221,7 +221,7 @@ export class ConversationView {
     return el;
   }
 
-  private scrollToBottom(): void {
+  scrollToBottom(): void {
     this.container.scrollTop = this.container.scrollHeight;
   }
 }
