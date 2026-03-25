@@ -124,7 +124,7 @@
   flex-direction: column;
   gap: 3px;
   min-width: 0;
-  max-width: calc(100% - 40px);
+  flex: 1;
 }
 
 /* ---- Header ---- */
@@ -178,6 +178,8 @@
   line-height: 1.5;
   font-size: var(--font-ui-small);
   color: var(--text-normal);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .pm__bubble--user {
