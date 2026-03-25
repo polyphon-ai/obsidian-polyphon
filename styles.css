@@ -138,13 +138,67 @@
   50% { opacity: 0; }
 }
 
-/* ---- Input area ---- */
+/* ---- Input wrapper (relative for dropdown positioning) ---- */
+.polyphon-input-wrapper {
+  position: relative;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+/* ---- @mention dropdown ---- */
+.polyphon-mention-dropdown {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
+  overflow: hidden;
+  z-index: 100;
+  margin-bottom: 2px;
+}
+
+.polyphon-mention-dropdown--hidden { display: none; }
+
+.polyphon-mention-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: var(--font-ui-small);
+  color: var(--text-normal);
+}
+
+.polyphon-mention-item:hover,
+.polyphon-mention-item--active {
+  background: var(--background-modifier-hover);
+}
+
+.polyphon-mention-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.polyphon-mention-name {
+  font-weight: 500;
+}
+
+/* ---- Input area (remove top border, now on wrapper) ---- */
+
 .polyphon-input-area {
   display: flex;
   flex-direction: column;
   gap: 6px;
   padding: 8px 10px;
-  border-top: 1px solid var(--background-modifier-border);
 }
 
 .polyphon-input {

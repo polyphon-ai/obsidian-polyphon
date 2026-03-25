@@ -2,9 +2,26 @@ import { ItemView, WorkspaceLeaf, Notice } from "obsidian";
 import type PolyphonPlugin from "./main";
 import { PolyphonClient } from "./PolyphonClient";
 import { ConversationView } from "./ConversationView";
-import type { Composition, Session, ConnectionStatus } from "./types";
+import type { Composition, Session, ConnectionStatus, Voice } from "./types";
 
 export const POLYPHON_SIDEBAR_VIEW_TYPE = "polyphon-sidebar";
+
+// Parses the first @VoiceName mention from message content.
+// Mirrors SessionManager.parseMention in the Polyphon main process.
+function parseMention(content: string, voices: Voice[]): Voice | null {
+  let firstMatch: { index: number; voice: Voice } | null = null;
+  for (const voice of voices) {
+    const pattern = new RegExp(
+      `(?:^|\\s)@${voice.displayName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:\\s|$|[,.!?])`,
+      "i"
+    );
+    const match = pattern.exec(content);
+    if (match && (firstMatch === null || match.index < firstMatch.index)) {
+      firstMatch = { index: match.index, voice };
+    }
+  }
+  return firstMatch?.voice ?? null;
+}
 
 export class PolyphonSidebarView extends ItemView {
   private plugin: PolyphonPlugin;
@@ -18,12 +35,19 @@ export class PolyphonSidebarView extends ItemView {
   private inputEl: HTMLTextAreaElement | null = null;
   private sendBtn: HTMLButtonElement | null = null;
   private sessionHeaderEl: HTMLElement | null = null;
+  private mentionDropdown: HTMLElement | null = null;
   private conversationView: ConversationView | null = null;
 
   private compositions: Composition[] = [];
   private activeComposition: Composition | null = null;
   private activeSession: Session | null = null;
   private lastSentFilePath: string | null = null;
+
+  // @mention autocomplete state
+  private mentionQuery: string | null = null;
+  private mentionStart = 0;
+  private mentionIndex = 0;
+  private mentionFiltered: Voice[] = [];
 
   constructor(leaf: WorkspaceLeaf, plugin: PolyphonPlugin) {
     super(leaf);
@@ -56,17 +80,14 @@ export class PolyphonSidebarView extends ItemView {
     root.empty();
     root.addClass("polyphon-sidebar");
 
-    // Status bar
     this.statusBar = root.createDiv({ cls: "polyphon-status-bar" });
     this.renderStatus();
 
-    // Composition selector row
     const topBar = root.createDiv({ cls: "polyphon-top-bar" });
     this.compositionSelect = topBar.createEl("select", { cls: "polyphon-select" });
     this.compositionSelect.createEl("option", { text: "— select a composition —", attr: { value: "" } });
     this.compositionSelect.addEventListener("change", () => void this.onCompositionSelected());
 
-    // Session selector row (hidden until composition selected)
     this.sessionRow = root.createDiv({ cls: "polyphon-session-row polyphon-session-row--hidden" });
     this.sessionSelect = this.sessionRow.createEl("select", { cls: "polyphon-select polyphon-session-select" });
     this.sessionSelect.addEventListener("change", () => void this.onSessionSelected());
@@ -74,28 +95,136 @@ export class PolyphonSidebarView extends ItemView {
     newBtn.title = "Start a new session";
     newBtn.addEventListener("click", () => void this.startNewSession());
 
-    // Session name header (shown when a session is active)
     this.sessionHeaderEl = root.createDiv({ cls: "polyphon-session-header polyphon-session-header--hidden" });
 
-    // Conversation area
     const conversationEl = root.createDiv({ cls: "polyphon-conversation" });
     this.conversationView = new ConversationView(conversationEl);
 
-    // Input area
-    const inputArea = root.createDiv({ cls: "polyphon-input-area" });
+    // Input wrapper — relative so dropdown can be positioned above it
+    const inputWrapper = root.createDiv({ cls: "polyphon-input-wrapper" });
+
+    // @mention dropdown (hidden by default, sits above textarea)
+    this.mentionDropdown = inputWrapper.createDiv({ cls: "polyphon-mention-dropdown polyphon-mention-dropdown--hidden" });
+
+    const inputArea = inputWrapper.createDiv({ cls: "polyphon-input-area" });
     this.inputEl = inputArea.createEl("textarea", {
       cls: "polyphon-input",
-      attr: { placeholder: "Message all voices… (Shift+Enter for newline)", rows: "3" },
+      attr: { placeholder: "Message all voices… (@ to target one)", rows: "3" },
     });
-    this.inputEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        void this.sendMessage();
-      }
-    });
+    this.inputEl.addEventListener("input", () => this.onInputChange());
+    this.inputEl.addEventListener("keydown", (e) => this.onInputKeyDown(e));
     this.sendBtn = inputArea.createEl("button", { cls: "polyphon-btn polyphon-btn--send", text: "Send" });
     this.sendBtn.addEventListener("click", () => void this.sendMessage());
     this.setSendEnabled(false);
+  }
+
+  // ---- @mention ----
+
+  private onInputChange(): void {
+    if (!this.inputEl) return;
+    const val = this.inputEl.value;
+    const cursor = this.inputEl.selectionStart ?? 0;
+    const before = val.slice(0, cursor);
+    const match = before.match(/@(\w*)$/);
+    if (match) {
+      const query = match[1] ?? "";
+      const voices = this.activeComposition?.voices ?? [];
+      this.mentionQuery = query;
+      this.mentionStart = cursor - match[0].length;
+      this.mentionFiltered = query === ""
+        ? voices
+        : voices.filter((v) => v.displayName.toLowerCase().startsWith(query.toLowerCase()));
+      this.mentionIndex = 0;
+      this.renderMentionDropdown();
+    } else {
+      this.closeMentionDropdown();
+    }
+  }
+
+  private onInputKeyDown(e: KeyboardEvent): void {
+    // Handle dropdown navigation first
+    if (this.mentionQuery !== null && this.mentionFiltered.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        this.mentionIndex = (this.mentionIndex + 1) % this.mentionFiltered.length;
+        this.renderMentionDropdown();
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        this.mentionIndex = (this.mentionIndex - 1 + this.mentionFiltered.length) % this.mentionFiltered.length;
+        this.renderMentionDropdown();
+        return;
+      }
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        this.insertMention(this.mentionFiltered[this.mentionIndex]!);
+        return;
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        this.closeMentionDropdown();
+        return;
+      }
+    }
+
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      void this.sendMessage();
+    }
+  }
+
+  private renderMentionDropdown(): void {
+    if (!this.mentionDropdown) return;
+    this.mentionDropdown.empty();
+
+    if (this.mentionFiltered.length === 0) {
+      this.closeMentionDropdown();
+      return;
+    }
+
+    this.mentionDropdown.removeClass("polyphon-mention-dropdown--hidden");
+
+    for (let i = 0; i < this.mentionFiltered.length; i++) {
+      const voice = this.mentionFiltered[i]!;
+      const item = this.mentionDropdown.createDiv({
+        cls: `polyphon-mention-item${i === this.mentionIndex ? " polyphon-mention-item--active" : ""}`,
+      });
+
+      const avatar = item.createSpan({ cls: "polyphon-mention-avatar" });
+      avatar.style.backgroundColor = `${voice.color}25`;
+      avatar.style.color = voice.color;
+      avatar.textContent = voice.displayName.charAt(0).toUpperCase();
+
+      item.createSpan({ cls: "polyphon-mention-name", text: `@${voice.displayName}` });
+
+      // mousedown instead of click to avoid blurring the textarea
+      item.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        this.insertMention(voice);
+      });
+    }
+  }
+
+  private insertMention(voice: Voice): void {
+    if (!this.inputEl) return;
+    const cursor = this.inputEl.selectionStart ?? this.mentionStart;
+    const val = this.inputEl.value;
+    const before = val.slice(0, this.mentionStart);
+    const after = val.slice(cursor);
+    const inserted = `@${voice.displayName} `;
+    this.inputEl.value = before + inserted + after;
+    const pos = this.mentionStart + inserted.length;
+    this.inputEl.setSelectionRange(pos, pos);
+    this.inputEl.focus();
+    this.closeMentionDropdown();
+  }
+
+  private closeMentionDropdown(): void {
+    this.mentionQuery = null;
+    this.mentionFiltered = [];
+    this.mentionDropdown?.addClass("polyphon-mention-dropdown--hidden");
+    this.mentionDropdown?.empty();
   }
 
   // ---- Status ----
@@ -178,7 +307,6 @@ export class PolyphonSidebarView extends ItemView {
       const sessions = await this.client.sessions(compositionId);
       this.sessionSelect.empty();
       this.sessionSelect.createEl("option", { text: "— resume a session —", attr: { value: "" } });
-      // Most recent first
       const sorted = sessions
         .filter((s) => !s.archived)
         .sort((a, b) => b.updatedAt - a.updatedAt);
@@ -206,17 +334,17 @@ export class PolyphonSidebarView extends ItemView {
       this.activeSession = session;
       this.lastSentFilePath = null;
       this.conversationView?.clear();
-
-      // Load existing messages
       const messages = await this.client.sessionMessages(sessionId);
       for (const msg of messages) {
         if (msg.role === "conductor") {
           this.conversationView?.appendUserMessage(msg.content);
         } else if (msg.role === "voice" && msg.voiceId && msg.voiceName) {
-          this.conversationView?.appendVoiceMessage(msg.voiceId, msg.voiceName, msg.content, this.activeComposition?.voices.find((v) => v.id === msg.voiceId)?.color ?? "");
+          this.conversationView?.appendVoiceMessage(
+            msg.voiceId, msg.voiceName, msg.content,
+            this.activeComposition?.voices.find((v) => v.id === msg.voiceId)?.color ?? ""
+          );
         }
       }
-
       this.renderSessionHeader(session);
       this.setSendEnabled(true);
     } catch {
@@ -232,18 +360,14 @@ export class PolyphonSidebarView extends ItemView {
       const vaultName = this.app.vault.getName();
       const date = new Date().toLocaleDateString(undefined, { month: "short", day: "numeric" });
       const name = `${vaultName} · ${date}`;
-
       const session = await this.client.createSession(compositionId, name, vaultPath);
       this.activeSession = session;
       this.lastSentFilePath = null;
       this.conversationView?.clear();
       this.renderSessionHeader(session);
       this.setSendEnabled(true);
-
-      // Refresh session list and select the new one
       await this.loadSessions(compositionId);
       if (this.sessionSelect) {
-        // Find the option matching the new session id
         const option = Array.from(this.sessionSelect.options).find((o) => o.value === session.id);
         if (option) this.sessionSelect.value = session.id;
       }
@@ -265,8 +389,8 @@ export class PolyphonSidebarView extends ItemView {
     const content = this.inputEl?.value.trim();
     if (!content || !this.activeSession) return;
     if (this.inputEl) this.inputEl.value = "";
+    this.closeMentionDropdown();
 
-    // Prepend current file path if it changed since the last message
     const activeFile = this.app.workspace.getActiveFile();
     const vaultBase = (this.app.vault.adapter as { basePath?: string }).basePath ?? "";
     const currentPath = activeFile ? `${vaultBase}/${activeFile.path}` : null;
@@ -277,8 +401,11 @@ export class PolyphonSidebarView extends ItemView {
 
     this.conversationView?.appendUserMessage(content);
 
+    // If message targets a specific voice, show only that voice as pending
     const voices = this.activeComposition?.voices ?? [];
-    this.conversationView?.showPending(voices);
+    const mentionedVoice = parseMention(messageContent, voices);
+    const pendingVoices = mentionedVoice ? [mentionedVoice] : voices;
+    this.conversationView?.showPending(pendingVoices);
     this.setSendEnabled(false);
 
     const onChunk = this.conversationView?.createChunkHandler();
