@@ -1,5 +1,7 @@
 import type { StreamChunkHandler } from "./PolyphonClient";
-import type { Voice } from "./types";
+import type { ConductorProfile, Voice } from "./types";
+
+const DEFAULT_CONDUCTOR_COLOR = "#6b7280";
 
 interface VoiceMessageState {
   voiceId: string;
@@ -14,9 +16,19 @@ interface VoiceMessageState {
 export class ConversationView {
   private container: HTMLElement;
   private activeVoiceStates = new Map<string, VoiceMessageState>();
+  private conductorProfile: ConductorProfile = {
+    conductorName: "You",
+    conductorColor: "",
+    conductorAvatar: "",
+    pronouns: "",
+  };
 
   constructor(container: HTMLElement) {
     this.container = container;
+  }
+
+  setConductorProfile(profile: ConductorProfile): void {
+    this.conductorProfile = profile;
   }
 
   clear(): void {
@@ -25,13 +37,18 @@ export class ConversationView {
   }
 
   appendUserMessage(content: string): void {
+    const color = this.conductorProfile.conductorColor || DEFAULT_CONDUCTOR_COLOR;
+    const name = this.conductorProfile.conductorName || "You";
     const el = this.container.createDiv({ cls: "pm pm--user" });
     const body = el.createDiv({ cls: "pm__body" });
     const header = body.createDiv({ cls: "pm__header" });
-    const avatar = header.createDiv({ cls: "pm__avatar pm__avatar--user" });
+    const avatar = header.createDiv({ cls: "pm__avatar" });
+    avatar.style.backgroundColor = `${color}25`;
+    avatar.style.color = color;
     avatar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>`;
-    header.createSpan({ cls: "pm__name", text: "You" });
-    body.createDiv({ cls: "pm__bubble", text: content });
+    header.createSpan({ cls: "pm__name", text: name });
+    const bubble = body.createDiv({ cls: "pm__bubble", text: content });
+    bubble.style.borderLeftColor = color;
     this.scrollToBottom();
   }
 

@@ -2,7 +2,7 @@ import { ItemView, WorkspaceLeaf, Notice } from "obsidian";
 import type PolyphonPlugin from "./main";
 import { PolyphonClient } from "./PolyphonClient";
 import { ConversationView } from "./ConversationView";
-import type { Composition, Session, ConnectionStatus, Voice } from "./types";
+import type { Composition, ConductorProfile, Session, ConnectionStatus, Voice } from "./types";
 
 export const POLYPHON_SIDEBAR_VIEW_TYPE = "polyphon-sidebar";
 
@@ -42,6 +42,12 @@ export class PolyphonSidebarView extends ItemView {
   private activeComposition: Composition | null = null;
   private activeSession: Session | null = null;
   private lastSentFilePath: string | null = null;
+  private conductorProfile: ConductorProfile = {
+    conductorName: "You",
+    conductorColor: "",
+    conductorAvatar: "",
+    pronouns: "",
+  };
 
   // @mention autocomplete state
   private mentionQuery: string | null = null;
@@ -265,7 +271,15 @@ export class PolyphonSidebarView extends ItemView {
     try {
       await this.client.connect();
       this.setStatus("connected");
-      await this.loadCompositions();
+      // Fetch profile and compositions in parallel
+      const [profile] = await Promise.allSettled([
+        this.client.getUserProfile(),
+        this.loadCompositions(),
+      ]);
+      if (profile.status === "fulfilled") {
+        this.conductorProfile = profile.value;
+        this.conversationView?.setConductorProfile(this.conductorProfile);
+      }
     } catch {
       this.setStatus("error");
     }

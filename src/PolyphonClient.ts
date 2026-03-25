@@ -5,6 +5,7 @@ import * as path from "path";
 import * as os from "os";
 import type {
   Composition,
+  ConductorProfile,
   JsonRpcError,
   JsonRpcResponse,
   Message,
@@ -147,6 +148,10 @@ export class PolyphonClient extends EventEmitter {
   async exportSession(sessionId: string, format: "markdown" | "json" | "plaintext"): Promise<string> {
     const result = await this.call<{ content: string }>("sessions.export", { sessionId, format });
     return result.content;
+  }
+
+  async getUserProfile(): Promise<ConductorProfile> {
+    return this.call<ConductorProfile>("settings.getUserProfile", {});
   }
 
   // ---- Internals ----

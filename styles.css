@@ -94,6 +94,15 @@
 }
 
 
+/* Conductor messages align right */
+.pm--user {
+  align-items: flex-end;
+}
+
+.pm--user .pm__header {
+  flex-direction: row-reverse;
+}
+
 /* ---- Avatar ---- */
 .pm__avatar {
   width: 20px;
@@ -109,10 +118,6 @@
   color: var(--text-muted);
 }
 
-.pm__avatar--user {
-  background: var(--interactive-accent);
-  color: var(--text-on-accent);
-}
 
 /* ---- Body ---- */
 .pm__body {

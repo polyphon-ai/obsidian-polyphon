@@ -83,6 +83,13 @@ export interface Message {
   roundIndex: number;
 }
 
+export interface ConductorProfile {
+  conductorName: string;
+  conductorColor: string;
+  conductorAvatar: string;
+  pronouns: string;
+}
+
 // ---- Plugin settings ----
 
 export interface PluginSettings {
