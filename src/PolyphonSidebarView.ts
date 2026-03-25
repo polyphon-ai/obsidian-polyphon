@@ -165,7 +165,8 @@ export class PolyphonSidebarView extends ItemView {
       this.activeComposition = this.compositions.find((c) => c.id === id) ?? null;
     }
     try {
-      this.activeSession = await this.client.createSession(id);
+      const vaultPath = (this.app.vault.adapter as { basePath?: string }).basePath ?? undefined;
+      this.activeSession = await this.client.createSession(id, undefined, vaultPath);
       this.conversationView?.clear();
       this.setSendEnabled(true);
     } catch {

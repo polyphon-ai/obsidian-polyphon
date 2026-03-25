@@ -108,8 +108,8 @@ export class PolyphonClient extends EventEmitter {
     return this.call<Composition>("compositions.get", { id });
   }
 
-  async createSession(compositionId: string, name?: string): Promise<Session> {
-    return this.call<Session>("sessions.create", { compositionId, name });
+  async createSession(compositionId: string, name?: string, workingDir?: string): Promise<Session> {
+    return this.call<Session>("sessions.create", { compositionId, name, workingDir: workingDir ?? null });
   }
 
   async getSession(id: string): Promise<Session> {
