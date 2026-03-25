@@ -101,8 +101,7 @@ export class PolyphonClient extends EventEmitter {
   // ---- API methods ----
 
   async compositions(): Promise<Composition[]> {
-    const result = await this.call<{ compositions: Composition[] }>("compositions.list", {});
-    return result.compositions;
+    return this.call<Composition[]>("compositions.list", {});
   }
 
   async getComposition(id: string): Promise<Composition> {
@@ -118,8 +117,7 @@ export class PolyphonClient extends EventEmitter {
   }
 
   async sessionMessages(sessionId: string): Promise<Message[]> {
-    const result = await this.call<{ messages: Message[] }>("sessions.messages", { sessionId });
-    return result.messages;
+    return this.call<Message[]>("sessions.messages", { sessionId });
   }
 
   // Streams chunks via onChunk callback (correlated by requestId).
