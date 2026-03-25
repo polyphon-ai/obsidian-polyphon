@@ -93,18 +93,6 @@
   width: 100%;
 }
 
-/* User messages align right */
-.pm--user {
-  align-items: flex-end;
-}
-
-.pm--user .pm__header {
-  flex-direction: row-reverse;
-}
-
-.pm--user .pm__bubble {
-  border-left: none;
-}
 
 /* ---- Avatar ---- */
 .pm__avatar {
@@ -132,11 +120,6 @@
   flex-direction: column;
   gap: 3px;
   width: 100%;
-}
-
-.pm--user .pm__body {
-  align-items: flex-end;
-  width: 90%;
 }
 
 /* ---- Header ---- */
@@ -190,15 +173,7 @@
   box-sizing: border-box;
 }
 
-.pm__bubble--user {
-  background: var(--interactive-accent);
-  color: var(--text-on-accent);
-  border-left: none;
-  border-right: none;
-  border-radius: var(--radius-m);
-  width: fit-content;
-  max-width: 85%;
-}
+
 
 /* Streaming cursor */
 .pm--streaming .pm__bubble:not(.pm__bubble--thinking)::after {
