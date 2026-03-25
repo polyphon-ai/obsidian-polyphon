@@ -421,6 +421,9 @@ export class PolyphonSidebarView extends ItemView {
       : content;
     if (currentPath) this.lastSentFilePath = currentPath;
 
+    // Show conductor thinking dots, then replace with the real message on next frame
+    this.conversationView?.showConductorPending();
+    await new Promise((r) => requestAnimationFrame(r));
     this.conversationView?.appendUserMessage(content);
 
     // If message targets a specific voice, show only that voice as pending
