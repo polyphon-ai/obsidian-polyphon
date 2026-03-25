@@ -71,6 +71,7 @@
   font-size: var(--font-ui-smaller);
   font-weight: 600;
   color: var(--text-muted);
+  line-height: 1.2;
 }
 
 .polyphon-message--user .polyphon-message-label { color: var(--color-accent); }
@@ -148,5 +149,52 @@
 .polyphon-btn--retry { font-size: var(--font-ui-smaller); padding: 2px 8px; }
 .polyphon-btn--icon  { padding: 2px 8px; font-size: 1.2em; line-height: 1; }
 
-/* ---- Settings ---- */
+/* ---- Voice label row ---- */
+.polyphon-message-label-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 2px;
+}
+
+.polyphon-voice-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ---- Thinking dots ---- */
+.polyphon-thinking-dots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 2px;
+}
+
+.polyphon-thinking-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  animation: polyphon-bounce 1s ease-in-out infinite;
+  opacity: 0.6;
+}
+
+@keyframes polyphon-bounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40%           { transform: translateY(-5px); }
+}
+
+.polyphon-message-content--empty {
+  background: transparent;
+  padding: 2px 0;
+}
+
+.polyphon-message-content--no-response {
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+
 .polyphon-settings .setting-item-name { font-weight: 600; }

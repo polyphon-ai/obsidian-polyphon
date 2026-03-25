@@ -18,6 +18,7 @@ export class PolyphonSidebarView extends ItemView {
   private conversationView: ConversationView | null = null;
 
   private compositions: Composition[] = [];
+  private activeComposition: Composition | null = null;
   private activeSession: Session | null = null;
 
   constructor(leaf: WorkspaceLeaf, plugin: PolyphonPlugin) {
@@ -153,12 +154,16 @@ export class PolyphonSidebarView extends ItemView {
   private async onCompositionSelected(): Promise<void> {
     const id = this.compositionSelect?.value;
     if (!id) return;
+    this.activeComposition = this.compositions.find((c) => c.id === id) ?? null;
     await this.startNewSession(id);
   }
 
   private async startNewSession(compositionId?: string): Promise<void> {
     const id = compositionId ?? this.compositionSelect?.value;
     if (!id) return;
+    if (!this.activeComposition) {
+      this.activeComposition = this.compositions.find((c) => c.id === id) ?? null;
+    }
     try {
       this.activeSession = await this.client.createSession(id);
       this.conversationView?.clear();
@@ -176,6 +181,11 @@ export class PolyphonSidebarView extends ItemView {
     if (this.inputEl) this.inputEl.value = "";
 
     this.conversationView?.appendUserMessage(content);
+
+    // Show pending placeholders for all voices immediately
+    const voices = this.activeComposition?.voices ?? [];
+    this.conversationView?.showPending(voices);
+
     this.setSendEnabled(false);
 
     const onChunk = this.conversationView?.createChunkHandler();
