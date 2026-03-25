@@ -27,7 +27,7 @@ export class ConversationView {
   appendUserMessage(content: string): void {
     const el = this.container.createDiv({ cls: "pm pm--user" });
     const avatar = el.createDiv({ cls: "pm__avatar pm__avatar--user" });
-    avatar.textContent = "You";
+    avatar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>`;
     const body = el.createDiv({ cls: "pm__body" });
     const header = body.createDiv({ cls: "pm__header" });
     header.createSpan({ cls: "pm__name", text: "You" });

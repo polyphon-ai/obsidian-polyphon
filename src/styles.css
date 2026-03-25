@@ -116,8 +116,6 @@
 .pm__avatar--user {
   background: var(--interactive-accent);
   color: var(--text-on-accent);
-  font-size: 9px;
-  font-weight: 600;
 }
 
 /* ---- Body ---- */
