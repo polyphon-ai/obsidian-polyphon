@@ -97,6 +97,19 @@
   flex-direction: row-reverse;
 }
 
+.pm--user .pm__body {
+  align-items: flex-end;
+}
+
+.pm--user .pm__header {
+  flex-direction: row-reverse;
+}
+
+.pm--user .pm__bubble {
+  border-left: none;
+  border-right: 3px solid var(--interactive-accent);
+}
+
 /* ---- Avatar ---- */
 .pm__avatar {
   width: 28px;
@@ -178,7 +191,8 @@
   line-height: 1.5;
   font-size: var(--font-ui-small);
   color: var(--text-normal);
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
   box-sizing: border-box;
 }
 
@@ -186,7 +200,10 @@
   background: var(--interactive-accent);
   color: var(--text-on-accent);
   border-left: none;
+  border-right: 3px solid var(--color-accent-2, var(--interactive-accent));
   border-radius: var(--radius-m);
+  width: fit-content;
+  max-width: 100%;
 }
 
 /* Streaming cursor */
