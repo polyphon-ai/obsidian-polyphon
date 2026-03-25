@@ -325,7 +325,7 @@ export class PolyphonSidebarView extends ItemView {
         .filter((s) => !s.archived)
         .sort((a, b) => b.updatedAt - a.updatedAt);
       for (const s of sorted) {
-        const date = new Date(s.updatedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+        const date = new Date(s.updatedAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
         this.sessionSelect.createEl("option", { text: `${s.name} · ${date}`, attr: { value: s.id } });
       }
       this.sessionRow.removeClass("polyphon-session-row--hidden");
