@@ -274,8 +274,8 @@ export class PolyphonSidebarView extends ItemView {
       connected: "Connected",
       error: "Connection error — click to retry",
     };
-    const dot = this.statusBar.createSpan({ cls: "polyphon-status-dot" });
     const tooltip = this.statusBar.createSpan({ cls: "polyphon-status-tooltip", text: labels[this.status] });
+    const dot = this.statusBar.createSpan({ cls: "polyphon-status-dot" });
 
     dot.addEventListener("mouseenter", () => tooltip.addClass("polyphon-status-tooltip--visible"));
     dot.addEventListener("mouseleave", () => tooltip.removeClass("polyphon-status-tooltip--visible"));
