@@ -91,8 +91,7 @@ export class PolyphonSidebarView extends ItemView {
     const headerText = header.createDiv({ cls: "polyphon-header__text" });
     headerText.createSpan({ cls: "polyphon-header__wordmark", text: "Polyphon" });
     headerText.createSpan({ cls: "polyphon-header__tagline", text: "One Chat. Many Voices." });
-
-    this.statusBar = root.createDiv({ cls: "polyphon-status-bar" });
+    this.statusBar = header.createDiv({ cls: "polyphon-status-bar" });
     this.renderStatus();
 
     const topBar = root.createDiv({ cls: "polyphon-top-bar" });
@@ -259,16 +258,16 @@ export class PolyphonSidebarView extends ItemView {
     this.statusBar.empty();
     this.statusBar.className = `polyphon-status-bar polyphon-status-bar--${this.status}`;
     const labels: Record<ConnectionStatus, string> = {
-      disconnected: "Not connected",
+      disconnected: "Not connected — click to connect",
       connecting: "Connecting…",
       connected: "Connected",
-      error: "Connection error",
+      error: "Connection error — click to retry",
     };
-    this.statusBar.createSpan({ cls: "polyphon-status-dot" });
-    this.statusBar.createSpan({ cls: "polyphon-status-label", text: labels[this.status] });
+    const dot = this.statusBar.createSpan({ cls: "polyphon-status-dot" });
+    dot.title = labels[this.status];
     if (this.status === "disconnected" || this.status === "error") {
-      const retryBtn = this.statusBar.createEl("button", { cls: "polyphon-btn polyphon-btn--retry", text: "Retry" });
-      retryBtn.addEventListener("click", () => void this.connect());
+      dot.style.cursor = "pointer";
+      dot.addEventListener("click", () => void this.connect());
     }
   }
 

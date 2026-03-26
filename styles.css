@@ -16,6 +16,15 @@
   border-bottom: 1px solid var(--background-modifier-border);
 }
 
+.polyphon-header .polyphon-status-bar {
+  margin-left: auto;
+  padding: 0;
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+}
+
 .polyphon-header__logo {
   display: flex;
   align-items: center;
@@ -57,18 +66,24 @@
   border-bottom: 1px solid var(--background-modifier-border);
 }
 
+.polyphon-status-label { color: var(--text-muted); flex: 1; }
+
 .polyphon-status-dot {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   flex-shrink: 0;
+  transition: opacity 0.2s;
+}
+
+.polyphon-status-dot:hover {
+  opacity: 0.75;
 }
 
 .polyphon-status-bar--disconnected .polyphon-status-dot { background: var(--text-muted); }
 .polyphon-status-bar--connecting .polyphon-status-dot  { background: var(--color-yellow); }
 .polyphon-status-bar--connected .polyphon-status-dot   { background: var(--color-green); }
 .polyphon-status-bar--error .polyphon-status-dot       { background: var(--color-red); }
-.polyphon-status-label { color: var(--text-muted); flex: 1; }
 
 /* ---- Select (shared) ---- */
 .polyphon-select {
