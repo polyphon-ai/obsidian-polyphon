@@ -269,23 +269,16 @@ export class PolyphonSidebarView extends ItemView {
     this.statusBar.empty();
     this.statusBar.className = `polyphon-status-bar polyphon-status-bar--${this.status}`;
     const labels: Record<ConnectionStatus, string> = {
-      disconnected: "Not connected — click to connect",
+      disconnected: "Offline",
       connecting: "Connecting…",
-      connected: "Connected",
-      error: "Connection error — click to retry",
+      connected: "Online",
+      error: "Error",
     };
-    const dot = this.statusBar.createSpan({ cls: "polyphon-status-dot" });
-    const tooltip = this.statusBar.createSpan({ cls: "polyphon-status-tooltip", text: labels[this.status] });
-    dot.addEventListener("mouseenter", () => {
-      const r = dot.getBoundingClientRect();
-      tooltip.style.top = `${r.bottom + 6}px`;
-      tooltip.style.right = `${window.innerWidth - r.right}px`;
-      tooltip.style.display = "block";
-    });
-    dot.addEventListener("mouseleave", () => tooltip.style.display = "none");
+    const badge = this.statusBar.createSpan({ cls: "polyphon-status-badge", text: labels[this.status] });
     if (this.status === "disconnected" || this.status === "error") {
-      dot.style.cursor = "pointer";
-      dot.addEventListener("click", () => void this.connect());
+      badge.title = "Click to connect";
+      badge.style.cursor = "pointer";
+      badge.addEventListener("click", () => void this.connect());
     }
   }
 
