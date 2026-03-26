@@ -11,6 +11,8 @@ export class PolyphonSidebarView extends ItemView {
   private plugin: PolyphonPlugin;
   private client: PolyphonClient;
   private status: ConnectionStatus = "disconnected";
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly RECONNECT_INTERVAL_MS = 5000;
 
   private statusBar: HTMLElement | null = null;
   private compositionSelect: HTMLSelectElement | null = null;
@@ -55,17 +57,20 @@ export class PolyphonSidebarView extends ItemView {
     this.client.on("disconnect", () => {
       this.setStatus("disconnected");
       this.setSendEnabled(false);
+      this.scheduleReconnect();
     });
 
     this.client.on("error", () => {
       this.setStatus("error");
       this.setSendEnabled(false);
+      this.scheduleReconnect();
     });
 
     await this.connect();
   }
 
   async onClose(): Promise<void> {
+    this.clearReconnectTimer();
     this.client.disconnect();
   }
 
@@ -298,10 +303,26 @@ export class PolyphonSidebarView extends ItemView {
 
   // ---- Connection ----
 
+  private scheduleReconnect(): void {
+    this.clearReconnectTimer();
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      void this.connect();
+    }, this.RECONNECT_INTERVAL_MS);
+  }
+
+  private clearReconnectTimer(): void {
+    if (this.reconnectTimer !== null) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+  }
+
   private async connect(): Promise<void> {
     this.setStatus("connecting");
     try {
       await this.client.connect();
+      this.clearReconnectTimer();
       this.setStatus("connected");
       // Fetch profile and compositions in parallel
       const [profile] = await Promise.allSettled([
