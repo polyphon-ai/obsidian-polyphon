@@ -81,6 +81,7 @@ export class PolyphonSidebarView extends ItemView {
   async onClose(): Promise<void> {
     this.clearReconnectTimer();
     this.client.disconnect();
+    document.body.querySelectorAll(".polyphon-voice-chip__tooltip").forEach(t => t.remove());
   }
 
   onClientReplaced(client: PolyphonClient): void {
@@ -481,6 +482,8 @@ export class PolyphonSidebarView extends ItemView {
   private renderVoiceRoster(): void {
     const el = this.voiceRosterEl;
     if (!el) return;
+    // Clean up any previously attached body tooltips
+    document.body.querySelectorAll(".polyphon-voice-chip__tooltip").forEach(t => t.remove());
     el.empty();
     const voices = this.activeComposition?.voices ?? [];
     if (voices.length === 0) {
@@ -494,7 +497,8 @@ export class PolyphonSidebarView extends ItemView {
       chip.style.setProperty("--voice-color", voice.color);
       chip.textContent = voice.displayName.charAt(0).toUpperCase();
 
-      const tooltip = el.createSpan({ cls: "polyphon-voice-chip__tooltip", text: voice.displayName });
+      const tooltip = document.body.createDiv({ cls: "polyphon-voice-chip__tooltip" });
+      tooltip.textContent = voice.displayName;
 
       chip.addEventListener("mouseenter", () => {
         const r = chip.getBoundingClientRect();
