@@ -131,19 +131,6 @@
 }
 .polyphon-session-row--hidden { display: none; }
 
-/* ---- Session header ---- */
-.polyphon-session-header {
-  padding: 4px 10px;
-  border-bottom: 1px solid var(--background-modifier-border);
-  background: var(--background-secondary);
-}
-.polyphon-session-header--hidden { display: none; }
-.polyphon-session-name {
-  font-size: var(--font-ui-smaller);
-  color: var(--text-muted);
-  font-style: italic;
-}
-
 /* ---- Conversation ---- */
 .polyphon-conversation {
   flex: 1;

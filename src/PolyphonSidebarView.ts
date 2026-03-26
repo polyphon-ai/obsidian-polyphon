@@ -21,7 +21,7 @@ export class PolyphonSidebarView extends ItemView {
   private sessionSelect: HTMLSelectElement | null = null;
   private inputEl: HTMLTextAreaElement | null = null;
   private sendBtn: HTMLButtonElement | null = null;
-  private sessionHeaderEl: HTMLElement | null = null;
+  private sessionHeaderEl: HTMLElement | null = null; // kept for compat, unused
   private mentionDropdown: HTMLElement | null = null;
   private conversationView: ConversationView | null = null;
 
@@ -130,7 +130,7 @@ export class PolyphonSidebarView extends ItemView {
     newBtn.title = "Start a new session";
     newBtn.addEventListener("click", () => void this.startNewSession());
 
-    this.sessionHeaderEl = root.createDiv({ cls: "polyphon-session-header polyphon-session-header--hidden" });
+    // session header removed — dropdown already shows current session
 
     const conversationEl = root.createDiv({ cls: "polyphon-conversation" });
     this.conversationView = new ConversationView(conversationEl);
@@ -469,11 +469,8 @@ export class PolyphonSidebarView extends ItemView {
     }
   }
 
-  private renderSessionHeader(session: Session): void {
-    if (!this.sessionHeaderEl) return;
-    this.sessionHeaderEl.empty();
-    this.sessionHeaderEl.removeClass("polyphon-session-header--hidden");
-    this.sessionHeaderEl.createSpan({ cls: "polyphon-session-name", text: session.name });
+  private renderSessionHeader(_session: Session): void {
+    // no-op — session title removed, dropdown is sufficient
   }
 
   // ---- Messaging ----
