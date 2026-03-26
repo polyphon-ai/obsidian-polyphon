@@ -8,9 +8,7 @@ export default defineConfig({
     },
   },
   test: {
-    environment: "jsdom",
-    include: ["tests/unit/ConversationView.unit.test.ts", "tests/unit/parseMention.unit.test.ts"],
-    setupFiles: ["tests/helpers/obsidianDomPolyfill.ts"],
-    pool: "vmThreads",
+    environment: "node",
+    include: ["tests/unit/PolyphonClient.unit.test.ts"],
   },
 });
