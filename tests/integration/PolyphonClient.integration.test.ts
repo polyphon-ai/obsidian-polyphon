@@ -31,7 +31,7 @@ class MockPolyphonServer {
             continue;
           }
           const handler = this.handlers.get(msg.method);
-          if (handler) {
+          if (typeof handler === "function") {
             const result = handler(msg.params);
             socket.write(JSON.stringify({ jsonrpc: "2.0", id: msg.id, result }) + "\n");
           } else {
