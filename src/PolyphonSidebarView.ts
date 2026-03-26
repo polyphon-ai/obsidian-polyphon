@@ -51,6 +51,17 @@ export class PolyphonSidebarView extends ItemView {
 
   async onOpen(): Promise<void> {
     this.buildLayout();
+
+    this.client.on("disconnect", () => {
+      this.setStatus("disconnected");
+      this.setSendEnabled(false);
+    });
+
+    this.client.on("error", () => {
+      this.setStatus("error");
+      this.setSendEnabled(false);
+    });
+
     await this.connect();
   }
 
