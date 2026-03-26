@@ -269,10 +269,10 @@ export class PolyphonSidebarView extends ItemView {
     this.statusBar.empty();
     this.statusBar.className = `polyphon-status-bar polyphon-status-bar--${this.status}`;
     const labels: Record<ConnectionStatus, string> = {
-      disconnected: "Offline",
-      connecting: "Connecting…",
-      connected: "Online",
-      error: "Error",
+      disconnected: "offline",
+      connecting: "connecting…",
+      connected: "online",
+      error: "error",
     };
     const badge = this.statusBar.createSpan({ cls: "polyphon-status-badge", text: labels[this.status] });
     if (this.status === "disconnected" || this.status === "error") {
