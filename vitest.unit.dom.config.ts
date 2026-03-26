@@ -8,7 +8,12 @@ export default defineConfig({
     },
   },
   test: {
-    environment: "node",
-    include: ["tests/unit/**/*.unit.test.ts"],
+    environment: "jsdom",
+    include: ["tests/unit/**/*.dom.test.ts"],
+    server: {
+      deps: {
+        inline: ["@exodus/bytes", "html-encoding-sniffer"],
+      },
+    },
   },
 });
