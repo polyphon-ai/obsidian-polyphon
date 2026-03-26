@@ -36,7 +36,7 @@ describe("defaultTokenPath", () => {
   it("respects POLYPHON_DATA_DIR override", () => {
     const orig = process.env.POLYPHON_DATA_DIR;
     process.env.POLYPHON_DATA_DIR = "/tmp/polyphon-test";
-    expect(defaultTokenPath()).toBe("/tmp/polyphon-test/api.key");
+    expect(defaultTokenPath()).toBe(path.join("/tmp/polyphon-test", "api.key"));
     if (orig === undefined) delete process.env.POLYPHON_DATA_DIR;
     else process.env.POLYPHON_DATA_DIR = orig;
   });
