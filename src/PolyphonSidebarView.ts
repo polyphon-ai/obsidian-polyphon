@@ -22,6 +22,7 @@ export class PolyphonSidebarView extends ItemView {
   private inputEl: HTMLTextAreaElement | null = null;
   private sendBtn: HTMLButtonElement | null = null;
   private sessionHeaderEl: HTMLElement | null = null; // kept for compat, unused
+  private voiceRosterEl: HTMLElement | null = null;
   private mentionDropdown: HTMLElement | null = null;
   private conversationView: ConversationView | null = null;
 
@@ -129,6 +130,8 @@ export class PolyphonSidebarView extends ItemView {
     const newBtn = this.sessionRow.createEl("button", { cls: "polyphon-btn polyphon-btn--new", text: "New" });
     newBtn.title = "Start a new session";
     newBtn.addEventListener("click", () => void this.startNewSession());
+
+    this.voiceRosterEl = root.createDiv({ cls: "polyphon-voice-roster polyphon-voice-roster--hidden" });
 
     // session header removed — dropdown already shows current session
 
@@ -434,6 +437,7 @@ export class PolyphonSidebarView extends ItemView {
         }
       }
       this.renderSessionHeader(session);
+      this.renderVoiceRoster();
       this.setSendEnabled(true);
       // Defer final scroll to after layout completes
       requestAnimationFrame(() => this.conversationView?.scrollToBottom());
@@ -458,6 +462,7 @@ export class PolyphonSidebarView extends ItemView {
       this.lastSentFilePath = null;
       this.conversationView?.clear();
       this.renderSessionHeader(session);
+      this.renderVoiceRoster();
       this.setSendEnabled(true);
       await this.loadSessions(compositionId);
       if (this.sessionSelect) {
@@ -471,6 +476,35 @@ export class PolyphonSidebarView extends ItemView {
 
   private renderSessionHeader(_session: Session): void {
     // no-op — session title removed, dropdown is sufficient
+  }
+
+  private renderVoiceRoster(): void {
+    const el = this.voiceRosterEl;
+    if (!el) return;
+    el.empty();
+    const voices = this.activeComposition?.voices ?? [];
+    if (voices.length === 0) {
+      el.addClass("polyphon-voice-roster--hidden");
+      return;
+    }
+    el.removeClass("polyphon-voice-roster--hidden");
+
+    const left = voices.filter(v => v.side === "left");
+    const right = voices.filter(v => v.side === "right");
+
+    const makeChip = (voice: typeof voices[0], container: HTMLElement) => {
+      const chip = container.createDiv({ cls: "polyphon-voice-chip" });
+      chip.style.setProperty("--voice-color", voice.color);
+      const avatar = chip.createSpan({ cls: "polyphon-voice-chip__avatar" });
+      avatar.textContent = voice.displayName.charAt(0).toUpperCase();
+      chip.createSpan({ cls: "polyphon-voice-chip__name", text: voice.displayName });
+    };
+
+    const leftGroup = el.createDiv({ cls: "polyphon-voice-roster__group polyphon-voice-roster__group--left" });
+    for (const v of left) makeChip(v, leftGroup);
+
+    const rightGroup = el.createDiv({ cls: "polyphon-voice-roster__group polyphon-voice-roster__group--right" });
+    for (const v of right) makeChip(v, rightGroup);
   }
 
   // ---- Messaging ----
