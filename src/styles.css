@@ -87,6 +87,22 @@
 .polyphon-status-bar--connected .polyphon-status-dot   { background: var(--color-green); }
 .polyphon-status-bar--error .polyphon-status-dot       { background: var(--color-red); }
 
+.polyphon-status-tooltip {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  max-width: 0;
+  overflow: hidden;
+  transition: opacity 0.15s, max-width 0.15s;
+}
+
+.polyphon-status-tooltip--visible {
+  opacity: 1;
+  max-width: 200px;
+}
+
 /* ---- Select (shared) ---- */
 .polyphon-select {
   flex: 1;
