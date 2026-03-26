@@ -23,6 +23,7 @@ export class PolyphonSidebarView extends ItemView {
   private sendBtn: HTMLButtonElement | null = null;
   private sessionHeaderEl: HTMLElement | null = null; // kept for compat, unused
   private voiceRosterEl: HTMLElement | null = null;
+  private voiceRosterChips = new Map<string, HTMLElement>(); // voiceId → chip element
   private mentionDropdown: HTMLElement | null = null;
   private conversationView: ConversationView | null = null;
 
@@ -482,9 +483,9 @@ export class PolyphonSidebarView extends ItemView {
   private renderVoiceRoster(): void {
     const el = this.voiceRosterEl;
     if (!el) return;
-    // Clean up any previously attached body tooltips
     document.body.querySelectorAll(".polyphon-voice-chip__tooltip").forEach(t => t.remove());
     el.empty();
+    this.voiceRosterChips.clear();
     const voices = this.activeComposition?.voices ?? [];
     if (voices.length === 0) {
       el.addClass("polyphon-voice-roster--hidden");
@@ -496,6 +497,7 @@ export class PolyphonSidebarView extends ItemView {
       const chip = el.createDiv({ cls: "polyphon-voice-chip" });
       chip.style.setProperty("--voice-color", voice.color);
       chip.textContent = voice.displayName.charAt(0).toUpperCase();
+      this.voiceRosterChips.set(voice.id, chip);
 
       const tooltip = document.body.createDiv({ cls: "polyphon-voice-chip__tooltip" });
       tooltip.textContent = voice.displayName;
@@ -509,6 +511,21 @@ export class PolyphonSidebarView extends ItemView {
       chip.addEventListener("mouseleave", () => {
         tooltip.style.display = "none";
       });
+    }
+  }
+
+  private setRosterVoiceState(voiceId: string, state: "idle" | "pending" | "streaming"): void {
+    const chip = this.voiceRosterChips.get(voiceId);
+    if (!chip) return;
+    chip.removeClass("polyphon-voice-chip--pending");
+    chip.removeClass("polyphon-voice-chip--streaming");
+    if (state === "pending") chip.addClass("polyphon-voice-chip--pending");
+    if (state === "streaming") chip.addClass("polyphon-voice-chip--streaming");
+  }
+
+  private resetRosterVoiceStates(): void {
+    for (const [voiceId] of this.voiceRosterChips) {
+      this.setRosterVoiceState(voiceId, "idle");
     }
   }
 
@@ -535,9 +552,16 @@ export class PolyphonSidebarView extends ItemView {
     const mentionedVoice = parseMention(messageContent, voices);
     const pendingVoices = mentionedVoice ? [mentionedVoice] : voices;
     this.conversationView?.showPending(pendingVoices);
+    for (const v of pendingVoices) this.setRosterVoiceState(v.id, "pending");
     this.setSendEnabled(false);
 
-    const onChunk = this.conversationView?.createChunkHandler();
+    const baseChunkHandler = this.conversationView?.createChunkHandler();
+    const onChunk: typeof baseChunkHandler = baseChunkHandler
+      ? (params) => {
+          this.setRosterVoiceState(params.voiceId, "streaming");
+          baseChunkHandler(params);
+        }
+      : undefined;
 
     try {
       await this.client.broadcast(this.activeSession.id, messageContent, onChunk);
@@ -546,6 +570,7 @@ export class PolyphonSidebarView extends ItemView {
       if (this.plugin.settings.debugMode) console.error("[Polyphon]", err);
     } finally {
       this.conversationView?.finalizeStreaming();
+      this.resetRosterVoiceStates();
       this.setSendEnabled(true);
       this.inputEl?.focus();
     }

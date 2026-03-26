@@ -148,6 +148,32 @@
   justify-content: center;
   cursor: default;
   flex-shrink: 0;
+  position: relative;
+  transition: box-shadow 0.2s;
+}
+
+.polyphon-voice-chip--pending {
+  border-style: dashed;
+  animation: polyphon-roster-spin 3s linear infinite;
+}
+
+.polyphon-voice-chip--streaming {
+  border-style: solid;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--voice-color) 40%, transparent),
+              0 0 8px color-mix(in srgb, var(--voice-color) 50%, transparent);
+  animation: polyphon-roster-pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes polyphon-roster-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes polyphon-roster-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px color-mix(in srgb, var(--voice-color) 40%, transparent),
+                          0 0 8px color-mix(in srgb, var(--voice-color) 50%, transparent); }
+  50%       { box-shadow: 0 0 0 3px color-mix(in srgb, var(--voice-color) 60%, transparent),
+                          0 0 14px color-mix(in srgb, var(--voice-color) 70%, transparent); }
 }
 
 .polyphon-voice-chip__tooltip {
