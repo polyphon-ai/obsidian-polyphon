@@ -8,7 +8,9 @@ export default defineConfig({
     },
   },
   test: {
-    environment: "node",
+    environment: "jsdom",
     include: ["tests/unit/**/*.unit.test.ts"],
+    setupFiles: ["tests/helpers/obsidianDomPolyfill.ts"],
+    pool: "vmThreads",
   },
 });

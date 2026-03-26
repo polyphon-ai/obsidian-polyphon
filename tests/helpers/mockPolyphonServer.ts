@@ -69,7 +69,11 @@ export async function startMockPolyphonServer(opts: {
   let broadcastChunkSets: Array<Array<{ voiceId: string; voiceName: string; delta: string }>> = [];
   let broadcastCallIndex = 0;
 
+  const sockets = new Set<net.Socket>();
+
   const server = net.createServer((socket) => {
+    sockets.add(socket);
+    socket.on("close", () => sockets.delete(socket));
     let authenticated = false;
     let buf = "";
 
@@ -253,6 +257,8 @@ export async function startMockPolyphonServer(opts: {
       broadcastCallIndex = 0;
     },
     close: () => new Promise<void>((resolve, reject) => {
+      for (const s of sockets) s.destroy();
+      sockets.clear();
       server.close((err) => err ? reject(err) : resolve());
     }),
   };
