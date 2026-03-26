@@ -489,22 +489,23 @@ export class PolyphonSidebarView extends ItemView {
     }
     el.removeClass("polyphon-voice-roster--hidden");
 
-    const left = voices.filter(v => v.side === "left");
-    const right = voices.filter(v => v.side === "right");
-
-    const makeChip = (voice: typeof voices[0], container: HTMLElement) => {
-      const chip = container.createDiv({ cls: "polyphon-voice-chip" });
+    for (const voice of voices) {
+      const chip = el.createDiv({ cls: "polyphon-voice-chip" });
       chip.style.setProperty("--voice-color", voice.color);
-      const avatar = chip.createSpan({ cls: "polyphon-voice-chip__avatar" });
-      avatar.textContent = voice.displayName.charAt(0).toUpperCase();
-      chip.createSpan({ cls: "polyphon-voice-chip__name", text: voice.displayName });
-    };
+      chip.textContent = voice.displayName.charAt(0).toUpperCase();
 
-    const leftGroup = el.createDiv({ cls: "polyphon-voice-roster__group polyphon-voice-roster__group--left" });
-    for (const v of left) makeChip(v, leftGroup);
+      const tooltip = el.createSpan({ cls: "polyphon-voice-chip__tooltip", text: voice.displayName });
 
-    const rightGroup = el.createDiv({ cls: "polyphon-voice-roster__group polyphon-voice-roster__group--right" });
-    for (const v of right) makeChip(v, rightGroup);
+      chip.addEventListener("mouseenter", () => {
+        const r = chip.getBoundingClientRect();
+        tooltip.style.left = `${r.left + r.width / 2}px`;
+        tooltip.style.top = `${r.bottom + 5}px`;
+        tooltip.style.display = "block";
+      });
+      chip.addEventListener("mouseleave", () => {
+        tooltip.style.display = "none";
+      });
+    }
   }
 
   // ---- Messaging ----
