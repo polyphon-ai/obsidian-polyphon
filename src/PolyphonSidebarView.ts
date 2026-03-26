@@ -264,9 +264,12 @@ export class PolyphonSidebarView extends ItemView {
       error: "Connection error — click to retry",
     };
     const dot = this.statusBar.createSpan({ cls: "polyphon-status-dot" });
-    dot.title = labels[this.status];
+    const tooltip = this.statusBar.createSpan({ cls: "polyphon-status-tooltip", text: labels[this.status] });
+
+    dot.addEventListener("mouseenter", () => tooltip.addClass("polyphon-status-tooltip--visible"));
+    dot.addEventListener("mouseleave", () => tooltip.removeClass("polyphon-status-tooltip--visible"));
+
     if (this.status === "disconnected" || this.status === "error") {
-      dot.style.cursor = "pointer";
       dot.addEventListener("click", () => void this.connect());
     }
   }
