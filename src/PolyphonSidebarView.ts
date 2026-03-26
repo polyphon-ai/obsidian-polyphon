@@ -13,6 +13,7 @@ export class PolyphonSidebarView extends ItemView {
   private status: ConnectionStatus = "disconnected";
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly RECONNECT_INTERVAL_MS = 5000;
+  private suppressDisconnectHandler = false;
 
   private statusBar: HTMLElement | null = null;
   private compositionSelect: HTMLSelectElement | null = null;
@@ -55,13 +56,20 @@ export class PolyphonSidebarView extends ItemView {
     this.buildLayout();
 
     this.client.on("disconnect", () => {
+      if (this.suppressDisconnectHandler) {
+        this.suppressDisconnectHandler = false;
+        return;
+      }
       this.setStatus("disconnected");
       this.setSendEnabled(false);
       this.scheduleReconnect();
     });
 
     this.client.on("error", () => {
-      this.setStatus("error");
+      // Socket error (e.g. ECONNREFUSED) — suppress the subsequent "disconnect" event
+      // and schedule reconnect ourselves
+      this.suppressDisconnectHandler = true;
+      this.setStatus("disconnected");
       this.setSendEnabled(false);
       this.scheduleReconnect();
     });
@@ -336,11 +344,12 @@ export class PolyphonSidebarView extends ItemView {
     } catch (err: any) {
       // Auth failure (wrong token) — don't retry, user needs to fix their token
       if (err?.code === -32001 || err?.message?.includes("Unauthorized")) {
+        this.suppressDisconnectHandler = true;
         this.setStatus("error");
         new Notice("Polyphon: invalid API token. Check plugin settings.");
       } else {
+        // Connection failure — the "disconnect" event will fire and schedule reconnect
         this.setStatus("disconnected");
-        this.scheduleReconnect();
       }
     }
   }
