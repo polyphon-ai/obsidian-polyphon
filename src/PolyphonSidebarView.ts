@@ -278,8 +278,10 @@ export class PolyphonSidebarView extends ItemView {
     if (this.status === "disconnected" || this.status === "error") {
       badge.style.cursor = "pointer";
       badge.addEventListener("click", () => void this.connect());
-      const hint = this.statusBar.createSpan({ cls: "polyphon-status-hint", text: "click to connect" });
-      hint.addEventListener("click", () => void this.connect());
+      const connectBtn = this.statusBar.createSpan({ cls: "polyphon-connect-btn" });
+      connectBtn.title = "Click to connect";
+      connectBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8H6a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2z"/></svg>`;
+      connectBtn.addEventListener("click", () => void this.connect());
     }
   }
 
