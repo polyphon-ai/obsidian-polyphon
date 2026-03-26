@@ -7,6 +7,32 @@
   font-size: var(--font-ui-small);
 }
 
+/* ---- Branding header ---- */
+.polyphon-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.polyphon-header__logo {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.polyphon-header__logo svg {
+  border-radius: 5px;
+}
+
+.polyphon-header__wordmark {
+  font-size: var(--font-ui-small);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--text-normal);
+}
+
 /* ---- Status bar ---- */
 .polyphon-status-bar {
   display: flex;
