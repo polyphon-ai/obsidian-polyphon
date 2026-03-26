@@ -71,6 +71,7 @@ export interface Session {
   archived: boolean;
   workingDir: string | null;
   sandboxedToWorkingDir: boolean;
+  source: string;
 }
 
 export interface Message {

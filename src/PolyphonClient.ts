@@ -124,7 +124,7 @@ export class PolyphonClient extends EventEmitter {
   }
 
   async createSession(compositionId: string, name?: string, workingDir?: string): Promise<Session> {
-    return this.call<Session>("sessions.create", { compositionId, name, workingDir: workingDir ?? null });
+    return this.call<Session>("sessions.create", { compositionId, source: "obsidian", name, workingDir: workingDir ?? null });
   }
 
   async renameSession(id: string, name: string): Promise<Session> {

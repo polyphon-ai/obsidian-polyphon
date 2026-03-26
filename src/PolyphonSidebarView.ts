@@ -2,26 +2,10 @@ import { ItemView, WorkspaceLeaf, Notice } from "obsidian";
 import type PolyphonPlugin from "./main";
 import { PolyphonClient } from "./PolyphonClient";
 import { ConversationView } from "./ConversationView";
+import { parseMention } from "./parseMention";
 import type { Composition, ConductorProfile, Session, ConnectionStatus, Voice } from "./types";
 
 export const POLYPHON_SIDEBAR_VIEW_TYPE = "polyphon-sidebar";
-
-// Parses the first @VoiceName mention from message content.
-// Mirrors SessionManager.parseMention in the Polyphon main process.
-function parseMention(content: string, voices: Voice[]): Voice | null {
-  let firstMatch: { index: number; voice: Voice } | null = null;
-  for (const voice of voices) {
-    const pattern = new RegExp(
-      `(?:^|\\s)@${voice.displayName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:\\s|$|[,.!?])`,
-      "i"
-    );
-    const match = pattern.exec(content);
-    if (match && (firstMatch === null || match.index < firstMatch.index)) {
-      firstMatch = { index: match.index, voice };
-    }
-  }
-  return firstMatch?.voice ?? null;
-}
 
 export class PolyphonSidebarView extends ItemView {
   private plugin: PolyphonPlugin;
@@ -335,7 +319,7 @@ export class PolyphonSidebarView extends ItemView {
       this.sessionSelect.empty();
       this.sessionSelect.createEl("option", { text: "— resume a session —", attr: { value: "" } });
       const sorted = sessions
-        .filter((s) => !s.archived)
+        .filter((s) => !s.archived && s.source === "obsidian")
         .sort((a, b) => b.updatedAt - a.updatedAt);
       for (const s of sorted) {
         const date = new Date(s.updatedAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
