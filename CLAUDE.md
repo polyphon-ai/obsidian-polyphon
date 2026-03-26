@@ -56,3 +56,7 @@ When the Polyphon TCP API changes:
 2. Update the API reference in `polyphon-ai.github.io/content/docs/for-developers/api.md`
 
 The default API port is **7432**. Users configure host/port in the plugin settings tab.
+
+## Ecosystem
+
+This project is part of the polyphon-ai workspace. See `../.github/CLAUDE.md` for how the projects relate to each other.
