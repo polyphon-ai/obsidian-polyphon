@@ -277,7 +277,7 @@ export class PolyphonSidebarView extends ItemView {
       disconnected: "offline",
       connecting: "connecting…",
       connected: "online",
-      error: "error",
+      error: "auth error",
     };
     const badge = this.statusBar.createSpan({ cls: "polyphon-status-badge", text: labels[this.status] });
     if (this.status === "disconnected" || this.status === "error") {
@@ -333,8 +333,15 @@ export class PolyphonSidebarView extends ItemView {
         this.conductorProfile = profile.value;
         this.conversationView?.setConductorProfile(this.conductorProfile);
       }
-    } catch {
-      this.setStatus("error");
+    } catch (err: any) {
+      // Auth failure (wrong token) — don't retry, user needs to fix their token
+      if (err?.code === -32001 || err?.message?.includes("Unauthorized")) {
+        this.setStatus("error");
+        new Notice("Polyphon: invalid API token. Check plugin settings.");
+      } else {
+        this.setStatus("disconnected");
+        this.scheduleReconnect();
+      }
     }
   }
 
