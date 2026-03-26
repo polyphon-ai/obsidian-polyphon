@@ -46,3 +46,13 @@ src/
 - `voice.broadcast` is used for all user messages (sends to all voices in the composition)
 - Streaming is handled via `stream.chunk` JSON-RPC notifications over the same TCP socket
 - Each voice response is rendered as a labeled message in a unified thread
+
+## API contract with polyphon
+
+`src/types.ts` **manually mirrors** `polyphon/src/shared/api.ts` and `polyphon/src/shared/types.ts`. There is no shared npm package — the types are duplicated by design to keep this plugin free of runtime dependencies on the main app.
+
+When the Polyphon TCP API changes:
+1. Update `src/types.ts` to match the new shapes
+2. Update the API reference in `polyphon-ai.github.io/content/docs/for-developers/api.md`
+
+The default API port is **7432**. Users configure host/port in the plugin settings tab.

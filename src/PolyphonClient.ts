@@ -6,7 +6,6 @@ import * as os from "os";
 import type {
   Composition,
   ConductorProfile,
-  JsonRpcError,
   JsonRpcResponse,
   Message,
   PolyphonConnectionConfig,
@@ -106,7 +105,7 @@ export class PolyphonClient extends EventEmitter {
     // Assign sides to voices matching Polyphon's SessionView logic (index % 2)
     return comps.map((c) => ({
       ...c,
-      voices: c.voices.map((v, i) => ({ ...v, side: (i % 2 === 0 ? "left" : "right") as "left" | "right" })),
+      voices: c.voices.map((v, i) => ({ ...v, side: (i % 2 === 0 ? "left" : "right") })),
     }));
   }
 
@@ -196,7 +195,7 @@ export class PolyphonClient extends EventEmitter {
       try {
         const msg = JSON.parse(line) as JsonRpcResponse | StreamChunkNotification;
         if ("method" in msg && msg.method === "stream.chunk") {
-          const notification = msg as StreamChunkNotification;
+          const notification = msg;
           // Route chunk to the specific pending call via requestId correlation
           const reqId = notification.params?.requestId;
           const pending = this.pending.get(reqId);
@@ -209,8 +208,8 @@ export class PolyphonClient extends EventEmitter {
           if (!pending) continue;
           this.pending.delete(res.id);
           if (res.error) {
-            const err = new Error((res.error as JsonRpcError).message);
-            (err as any).code = (res.error as JsonRpcError).code;
+            const err: Error & { code?: number } = new Error(res.error.message);
+            err.code = res.error.code;
             pending.reject(err);
           } else {
             pending.resolve(res.result);

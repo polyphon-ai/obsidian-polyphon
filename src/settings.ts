@@ -56,11 +56,11 @@ export class PolyphonSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("API token")
-      .setDesc("Token from Polyphon's API settings. Use 'Read local token' to auto-fill from the running instance.")
+      .setDesc("Token from Polyphon's API settings. Use 'read local token' to auto-fill from the running instance.")
       .addText((text) => {
         text.inputEl.type = "password";
         text
-          .setPlaceholder("auto-detected from local install")
+          .setPlaceholder("Auto-detected from local install")
           .setValue(this.plugin.settings.token)
           .onChange(async (value) => {
             this.plugin.settings.token = value;

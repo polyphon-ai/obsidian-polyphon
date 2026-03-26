@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf, Notice } from "obsidian";
+import { ItemView, WorkspaceLeaf, Notice, sanitizeHTMLToDom, setIcon } from "obsidian";
 import type PolyphonPlugin from "./main";
 import { PolyphonClient } from "./PolyphonClient";
 import { ConversationView } from "./ConversationView";
@@ -100,7 +100,7 @@ export class PolyphonSidebarView extends ItemView {
     // Branding header
     const header = root.createDiv({ cls: "polyphon-header" });
     const logoEl = header.createDiv({ cls: "polyphon-header__logo" });
-    logoEl.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 680" width="22" height="22">
+    logoEl.appendChild(sanitizeHTMLToDom(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 680" width="22" height="22">
       <defs><clipPath id="ph-ic"><rect x="40" y="40" width="600" height="600" rx="128"/></clipPath></defs>
       <rect x="40" y="40" width="600" height="600" rx="128" fill="#f0f0f8"/>
       <g clip-path="url(#ph-ic)">
@@ -114,7 +114,7 @@ export class PolyphonSidebarView extends ItemView {
         <path d="M  40 246 A 394 394 0 0 1 434 640" fill="none" stroke="#0891b2" stroke-width="22" stroke-linecap="round" opacity="0.72"/>
         <path d="M  40 122 A 518 518 0 0 1 558 640" fill="none" stroke="#0e7490" stroke-width="19" stroke-linecap="round" opacity="0.56"/>
       </g>
-    </svg>`;
+    </svg>`));
     const headerText = header.createDiv({ cls: "polyphon-header__text" });
     headerText.createSpan({ cls: "polyphon-header__wordmark", text: "Polyphon" });
     headerText.createSpan({ cls: "polyphon-header__tagline", text: "One Chat. Many Voices." });
@@ -211,7 +211,7 @@ export class PolyphonSidebarView extends ItemView {
       }
       if (e.key === "Enter" || e.key === "Tab") {
         e.preventDefault();
-        this.insertMention(this.mentionFiltered[this.mentionIndex]!);
+        this.insertMention(this.mentionFiltered[this.mentionIndex]);
         return;
       }
       if (e.key === "Escape") {
@@ -239,7 +239,7 @@ export class PolyphonSidebarView extends ItemView {
     this.mentionDropdown.removeClass("polyphon-mention-dropdown--hidden");
 
     for (let i = 0; i < this.mentionFiltered.length; i++) {
-      const voice = this.mentionFiltered[i]!;
+      const voice = this.mentionFiltered[i];
       const item = this.mentionDropdown.createDiv({
         cls: `polyphon-mention-item${i === this.mentionIndex ? " polyphon-mention-item--active" : ""}`,
       });
@@ -294,11 +294,11 @@ export class PolyphonSidebarView extends ItemView {
     };
     const badge = this.statusBar.createSpan({ cls: "polyphon-status-badge", text: labels[this.status] });
     if (this.status === "disconnected" || this.status === "error") {
-      badge.style.cursor = "pointer";
+      badge.addClass("polyphon-status-badge--clickable");
       badge.addEventListener("click", () => void this.connect());
       const connectBtn = this.statusBar.createSpan({ cls: "polyphon-connect-btn" });
       connectBtn.title = "Click to connect";
-      connectBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8H6a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2z"/></svg>`;
+      setIcon(connectBtn, "plug-zap");
       connectBtn.addEventListener("click", () => void this.connect());
     }
   }
@@ -346,9 +346,11 @@ export class PolyphonSidebarView extends ItemView {
         this.conductorProfile = profile.value;
         this.conversationView?.setConductorProfile(this.conductorProfile);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Auth failure (wrong token) — don't retry, user needs to fix their token
-      if (err?.code === -32001 || err?.message?.includes("Unauthorized")) {
+      const errCode = err instanceof Error && "code" in err ? (err as Error & { code: number }).code : undefined;
+      const errMsg = err instanceof Error ? err.message : "";
+      if (errCode === -32001 || errMsg.includes("Unauthorized")) {
         this.suppressDisconnectHandler = true;
         this.setStatus("error");
         new Notice("Polyphon: invalid API token. Check plugin settings.");
@@ -442,7 +444,7 @@ export class PolyphonSidebarView extends ItemView {
       this.renderVoiceRoster();
       this.setSendEnabled(true);
       // Defer final scroll to after layout completes
-      requestAnimationFrame(() => this.conversationView?.scrollToBottom());
+      window.requestAnimationFrame(() => this.conversationView?.scrollToBottom());
     } catch {
       new Notice("Polyphon: failed to resume session.");
     }
@@ -506,10 +508,10 @@ export class PolyphonSidebarView extends ItemView {
         const r = chip.getBoundingClientRect();
         tooltip.style.left = `${r.left + r.width / 2}px`;
         tooltip.style.top = `${r.bottom + 5}px`;
-        tooltip.style.display = "block";
+        tooltip.addClass("polyphon-voice-chip__tooltip--visible");
       });
       chip.addEventListener("mouseleave", () => {
-        tooltip.style.display = "none";
+        tooltip.removeClass("polyphon-voice-chip__tooltip--visible");
       });
     }
   }

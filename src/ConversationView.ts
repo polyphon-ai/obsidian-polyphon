@@ -46,7 +46,11 @@ export class ConversationView {
     const avatar = header.createDiv({ cls: "pm__avatar" });
     avatar.style.backgroundColor = `${color}25`;
     avatar.style.color = color;
-    avatar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>`;
+    const iconSvg = new DOMParser().parseFromString(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>`,
+      "image/svg+xml"
+    ).documentElement;
+    avatar.appendChild(document.adoptNode(iconSvg));
     header.createSpan({ cls: "pm__name", text: name });
     if (content === null) {
       // Thinking state
@@ -95,8 +99,8 @@ export class ConversationView {
       const wrapEl = this.buildVoiceBubble(voice.id, voice.displayName, voice.color, null, "pending", voice.side);
       this.container.appendChild(wrapEl);
 
-      const contentEl = wrapEl.querySelector(".pm__bubble") as HTMLElement;
-      const headerDot = wrapEl.querySelector(".pm__status-dot") as HTMLElement | null;
+      const contentEl = wrapEl.querySelector<HTMLElement>(".pm__bubble")!;
+      const headerDot = wrapEl.querySelector<HTMLElement>(".pm__status-dot");
 
       this.activeVoiceStates.set(voice.id, {
         voiceId: voice.id,
@@ -118,8 +122,8 @@ export class ConversationView {
       if (!state) {
         const wrapEl = this.buildVoiceBubble(voiceId, voiceName, "", null, "streaming");
         this.container.appendChild(wrapEl);
-        const contentEl = wrapEl.querySelector(".pm__bubble") as HTMLElement;
-        const headerDot = wrapEl.querySelector(".pm__status-dot") as HTMLElement | null;
+        const contentEl = wrapEl.querySelector<HTMLElement>(".pm__bubble")!;
+        const headerDot = wrapEl.querySelector<HTMLElement>(".pm__status-dot");
         state = { voiceId, voiceName, color: "", wrapEl, contentEl, headerDot, status: "streaming" };
         this.activeVoiceStates.set(voiceId, state);
       }
@@ -200,7 +204,7 @@ export class ConversationView {
     const bubble = body.createDiv({ cls: bubbleCls });
     if (color) {
       if (side === "right") {
-        bubble.style.borderLeftColor = "transparent";
+        bubble.addClass("pm__bubble--right-voice");
         bubble.style.borderRightColor = color;
       } else {
         bubble.style.borderLeftColor = color;

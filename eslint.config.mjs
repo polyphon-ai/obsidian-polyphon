@@ -6,6 +6,12 @@ export default defineConfig([
   { ignores: ["src/__tests__/**"] },
   ...obsidianmd.configs.recommended,
   {
+    rules: {
+      // Allow product name and standard acronyms in UI text
+      "obsidianmd/ui/sentence-case": ["error", { ignoreRegex: ["Polyphon", "JSON-RPC"] }],
+    },
+  },
+  {
     files: ["src/**/*.ts"],
     languageOptions: {
       parser: tsparser,
