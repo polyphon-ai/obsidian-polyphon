@@ -317,7 +317,7 @@ export async function launchObsidian(
         // /T terminates child processes; /F forces termination. Obsidian.exe is hardcoded.
         try { execSync("taskkill /F /IM Obsidian.exe /T", { stdio: "ignore" }); } catch { /* ignore */ }
       } else {
-        try { execSync("pkill -x obsidian", { stdio: "ignore" }); } catch { /* ignore */ }
+        try { execSync("pkill -KILL -x obsidian", { stdio: "ignore" }); } catch { /* ignore */ }
       }
       await waitForObsidianToExit(10_000);
       unregisterTestVault(vaultId, originalContent);

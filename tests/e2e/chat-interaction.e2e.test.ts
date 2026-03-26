@@ -127,7 +127,7 @@ describe.skipIf(!binary)("chat-interaction", () => {
 
   it("send button is enabled after session is created", async () => {
     const btn = page.locator(SEND_BTN);
-    await expect(btn).not.toBeDisabled();
+    expect(await btn.isDisabled()).toBe(false);
   });
 
   it("sends a message and shows user bubble", async () => {
