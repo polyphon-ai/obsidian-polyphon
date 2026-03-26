@@ -88,19 +88,18 @@
 .polyphon-status-bar--error .polyphon-status-dot       { background: var(--color-red); }
 
 .polyphon-status-tooltip {
+  display: none;
+  position: fixed;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  padding: 3px 8px;
   font-size: var(--font-ui-smaller);
-  color: var(--text-muted);
+  color: var(--text-normal);
   white-space: nowrap;
   pointer-events: none;
-  opacity: 0;
-  max-width: 0;
-  overflow: hidden;
-  transition: opacity 0.15s, max-width 0.15s;
-}
-
-.polyphon-status-tooltip--visible {
-  opacity: 1;
-  max-width: 200px;
+  z-index: 9999;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 /* ---- Select (shared) ---- */
