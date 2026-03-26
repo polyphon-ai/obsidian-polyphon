@@ -88,7 +88,9 @@ export class PolyphonSidebarView extends ItemView {
         <path d="M  40 122 A 518 518 0 0 1 558 640" fill="none" stroke="#0e7490" stroke-width="19" stroke-linecap="round" opacity="0.56"/>
       </g>
     </svg>`;
-    header.createSpan({ cls: "polyphon-header__wordmark", text: "Polyphon" });
+    const headerText = header.createDiv({ cls: "polyphon-header__text" });
+    headerText.createSpan({ cls: "polyphon-header__wordmark", text: "Polyphon" });
+    headerText.createSpan({ cls: "polyphon-header__tagline", text: "One Chat. Many Voices." });
 
     this.statusBar = root.createDiv({ cls: "polyphon-status-bar" });
     this.renderStatus();
