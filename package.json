@@ -32,9 +32,9 @@
     "eslint-plugin-obsidianmd": "^0.1.9",
     "jsdom": "^28.1.0",
     "obsidian": "latest",
+    "playwright": "^1.58.2",
     "tslib": "^2.4.0",
     "typescript": "^5.0.4",
     "vitest": "^4.0.18"
-  },
-  "dependencies": {}
+  }
 }

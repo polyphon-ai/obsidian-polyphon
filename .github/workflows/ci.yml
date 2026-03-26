@@ -75,8 +75,12 @@ jobs:
 
       - name: Download and extract Obsidian
         run: |
-          OBSIDIAN_TAG=$(curl -s "https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest" \
+          OBSIDIAN_TAG=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest" \
             | jq -r '.tag_name')
+          if [[ -z "$OBSIDIAN_TAG" || "$OBSIDIAN_TAG" == "null" ]]; then
+            echo "Failed to fetch Obsidian release tag" && exit 1
+          fi
           OBSIDIAN_VERSION="${OBSIDIAN_TAG#v}"
           curl -L \
             "https://github.com/obsidianmd/obsidian-releases/releases/download/${OBSIDIAN_TAG}/Obsidian-${OBSIDIAN_VERSION}.AppImage" \
@@ -115,8 +119,12 @@ jobs:
 
       - name: Download and install Obsidian
         run: |
-          OBSIDIAN_TAG=$(curl -s "https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest" \
+          OBSIDIAN_TAG=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest" \
             | jq -r '.tag_name')
+          if [[ -z "$OBSIDIAN_TAG" || "$OBSIDIAN_TAG" == "null" ]]; then
+            echo "Failed to fetch Obsidian release tag" && exit 1
+          fi
           OBSIDIAN_VERSION="${OBSIDIAN_TAG#v}"
           curl -L \
             "https://github.com/obsidianmd/obsidian-releases/releases/download/${OBSIDIAN_TAG}/Obsidian-${OBSIDIAN_VERSION}.dmg" \
