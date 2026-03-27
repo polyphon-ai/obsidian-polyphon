@@ -67,6 +67,11 @@ npm run lint   # ESLint
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for details on the test suite and architecture.
 
+## Community
+
+- [Join the discussion](https://github.com/polyphon-ai/.github/discussions) — questions, ideas, and feedback
+- [Open an issue](https://github.com/polyphon-ai/obsidian-polyphon/issues) — bug reports and feature requests
+
 ## License
 
 MIT — see [LICENSE](LICENSE)

@@ -219,16 +219,6 @@ On first run, Docker pulls the `ollama/ollama:0.6.5` image (~700 MB) and then do
 
 Failure screenshots and Docker logs are saved to `tests/e2e-live/artifacts/` (gitignored).
 
-## Submitting changes
+## Contributing
 
-1. Fork the repository and create a branch from `main`.
-2. Make your changes. Run `npm run build` to verify TypeScript passes before committing.
-3. Use [Conventional Commits](https://www.conventionalcommits.org/) for commit messages:
-   `feat(scope): add thing`, `fix(scope): correct thing`, `docs: update readme`, etc.
-4. Open a pull request against `main`. Fill in the PR template.
-
-## Releasing
-
-Maintainers use the `/release` Claude Code command to publish releases. See
-`.claude/commands/release.md` for details. Releases are tagged as bare semver
-(`0.2.0`, not `v0.2.0`) to satisfy Obsidian's plugin installer requirements.
+This repository is not currently accepting pull requests. If you have ideas, feedback, or want to discuss a change, open a [GitHub Discussion](https://github.com/polyphon-ai/.github/discussions) or an issue instead.
