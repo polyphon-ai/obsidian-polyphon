@@ -26,7 +26,7 @@ vault-setup: clean build
 build:
 	npm run build
 
-test: test-unit test-integration
+test: lint test-unit test-integration
 
 test-unit:
 	npm run test-unit

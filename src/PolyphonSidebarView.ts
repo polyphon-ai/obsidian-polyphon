@@ -367,7 +367,7 @@ export class PolyphonSidebarView extends ItemView {
       const comps = await this.client.compositions();
       this.compositions = comps.map((c) => ({
         ...c,
-        voices: c.voices.map((v, i) => ({ ...v, side: (i % 2 === 0 ? "left" : "right") as "left" | "right" })),
+        voices: c.voices.map((v, i) => ({ ...v, side: i % 2 === 0 ? "left" : "right" as "left" | "right" })),
       }));
       this.populateCompositionSelect();
     } catch {

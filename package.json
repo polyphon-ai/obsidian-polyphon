@@ -23,7 +23,7 @@
   "author": "Corey Daley",
   "license": "MIT",
   "dependencies": {
-    "@polyphon-ai/js": "file:../polyphon-js"
+    "@polyphon-ai/js": "^0.13.1"
   },
   "devDependencies": {
     "@types/node": "^25.4.0",
