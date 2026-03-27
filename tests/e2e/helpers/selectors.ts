@@ -2,7 +2,7 @@
 
 // Obsidian structural
 export const WORKSPACE_CONTAINER = ".workspace";
-export const RIBBON_OPEN_POLYPHON = '[aria-label="Open Polyphon"]';
+export const RIBBON_OPEN_POLYPHON = '[aria-label="Open sidebar"]';
 export const COMMAND_PALETTE_INPUT = 'input[placeholder*="command"], .prompt-input';
 
 // Plugin root
