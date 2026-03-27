@@ -79,10 +79,11 @@ export class PolyphonSidebarView extends ItemView {
     await this.connect();
   }
 
-  async onClose(): Promise<void> {
+  onClose(): Promise<void> {
     this.clearReconnectTimer();
     this.client.disconnect();
     document.body.querySelectorAll(".polyphon-voice-chip__tooltip").forEach(t => t.remove());
+    return Promise.resolve();
   }
 
   onClientReplaced(client: PolyphonClient): void {

@@ -17,7 +17,7 @@ export default class PolyphonPlugin extends Plugin {
       (leaf) => new PolyphonSidebarView(leaf, this)
     );
 
-    this.addRibbonIcon("message-square", "Open Polyphon", () => {
+    this.addRibbonIcon("message-square", "Open sidebar", () => {
       void this.activateSidebar();
     });
 

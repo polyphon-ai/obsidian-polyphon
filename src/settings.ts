@@ -27,7 +27,7 @@ export class PolyphonSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Host")
-      .setDesc("Hostname or IP of the running Polyphon instance.")
+      .setDesc("Hostname or IP address of the running instance.")
       .addText((text) =>
         text
           .setPlaceholder("127.0.0.1")
@@ -40,7 +40,7 @@ export class PolyphonSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Port")
-      .setDesc("TCP port Polyphon is listening on.")
+      .setDesc("TCP port the service is listening on.")
       .addText((text) =>
         text
           .setPlaceholder("7432")
@@ -56,7 +56,7 @@ export class PolyphonSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("API token")
-      .setDesc("Token from Polyphon's API settings. Use 'read local token' to auto-fill from the running instance.")
+      .setDesc("Authentication token. Use 'read local token' to auto-fill from the running instance.")
       .addText((text) => {
         text.inputEl.type = "password";
         text
@@ -98,7 +98,7 @@ export class PolyphonSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Debug mode")
-      .setDesc("Log raw JSON-RPC frames to the console.")
+      .setDesc("Log raw protocol frames to the console.")
       .addToggle((toggle) =>
         toggle.setValue(this.plugin.settings.debugMode).onChange(async (value) => {
           this.plugin.settings.debugMode = value;
