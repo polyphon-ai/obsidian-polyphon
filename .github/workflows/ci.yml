@@ -54,51 +54,6 @@ jobs:
       - name: Run integration tests
         run: npm run test-integration
 
-  e2e-tests-linux:
-    name: E2E Tests (Linux)
-    # Linux: extract Obsidian's AppImage and run under a virtual framebuffer (xvfb).
-    # Windows E2E is a known gap — see SPRINT-010 Known Gaps for the path forward.
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "20"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Electron system dependencies
-        run: npx playwright install-deps chromium
-
-      - name: Download and extract Obsidian
-        run: |
-          OBSIDIAN_TAG=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest" \
-            | jq -r '.tag_name')
-          if [[ -z "$OBSIDIAN_TAG" || "$OBSIDIAN_TAG" == "null" ]]; then
-            echo "Failed to fetch Obsidian release tag" && exit 1
-          fi
-          OBSIDIAN_VERSION="${OBSIDIAN_TAG#v}"
-          curl -L \
-            "https://github.com/obsidianmd/obsidian-releases/releases/download/${OBSIDIAN_TAG}/Obsidian-${OBSIDIAN_VERSION}.AppImage" \
-            -o /tmp/Obsidian.AppImage
-          chmod +x /tmp/Obsidian.AppImage
-          cd /tmp && ./Obsidian.AppImage --appimage-extract > /dev/null
-          # Point directly to the Obsidian binary, not AppRun: AppRun contains a
-          # hardcoded path /obsidian that only works under a FUSE mount, not when
-          # extracted. The binary uses RPATH=$ORIGIN so it finds bundled libs
-          # in the same directory without any LD_LIBRARY_PATH setup needed.
-          echo "OBSIDIAN_BINARY=/tmp/squashfs-root/obsidian" >> "$GITHUB_ENV"
-
-      - name: Build plugin
-        run: npm run build
-
-      - name: Run E2E tests
-        run: xvfb-run --auto-servernum npm run test-e2e
-
   e2e-tests-macos:
     name: E2E Tests (macOS)
     # macOS: download the .dmg, mount it, copy Obsidian.app to /Applications, then
