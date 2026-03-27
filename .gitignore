@@ -5,3 +5,6 @@ tests/e2e/artifacts/
 tests/e2e-live/artifacts/
 # .npmrc is safe to commit here (no tokens — only sets tag-version-prefix)
 !.npmrc
+
+# Internal planning and development docs
+docs/
