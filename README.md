@@ -9,21 +9,18 @@ An Obsidian plugin that connects to a running [Polyphon](https://polyphon.ai) in
 
 ## Installation
 
-### Community plugin directory (recommended)
+The plugin is not yet listed in the Obsidian community plugin directory. Install it manually or via BRAT.
 
-1. Open **Settings → Community plugins → Browse**
-2. Search for **Polyphon**
-3. Click **Install**, then **Enable**
-
-### Manual installation
+### Manual installation (recommended)
 
 1. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](../../releases/latest)
-2. Copy them to `<vault>/.obsidian/plugins/polyphon/`
-3. Enable the plugin in **Settings → Community plugins**
+2. Create the folder `<vault>/.obsidian/plugins/polyphon/` if it doesn't exist
+3. Copy the three files into that folder
+4. Enable the plugin in **Settings → Community plugins**
 
-### BRAT (beta)
+### BRAT
 
-Install [BRAT](https://github.com/TfTHacker/obsidian42-brat) and add `polyphon-ai/obsidian-polyphon`.
+Install [BRAT](https://github.com/TfTHacker/obsidian42-brat), then add `polyphon-ai/obsidian-polyphon` as a beta plugin. BRAT will keep it up to date automatically.
 
 ## Configuration
 
