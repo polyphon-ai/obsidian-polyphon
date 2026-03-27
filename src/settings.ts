@@ -1,6 +1,6 @@
 import { App, Notice, PluginSettingTab, Setting } from "obsidian";
 import type PolyphonPlugin from "./main";
-import { readLocalToken } from "./PolyphonClient";
+import { readLocalToken } from "@polyphon-ai/js";
 
 export const DEFAULT_SETTINGS = {
   host: "127.0.0.1",

@@ -1,5 +1,5 @@
 import { Plugin } from "obsidian";
-import { PolyphonClient } from "./PolyphonClient";
+import { PolyphonClient } from "@polyphon-ai/js";
 import { PolyphonSidebarView, POLYPHON_SIDEBAR_VIEW_TYPE } from "./PolyphonSidebarView";
 import { DEFAULT_SETTINGS, PolyphonSettingTab } from "./settings";
 import type { PluginSettings } from "./types";

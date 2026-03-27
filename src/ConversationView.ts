@@ -1,4 +1,4 @@
-import type { StreamChunkHandler } from "./PolyphonClient";
+import type { StreamChunkHandler } from "./types";
 import type { ConductorProfile, Voice } from "./types";
 
 const DEFAULT_CONDUCTOR_COLOR = "#6b7280";

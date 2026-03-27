@@ -1,6 +1,6 @@
 import { ItemView, WorkspaceLeaf, Notice, sanitizeHTMLToDom, setIcon } from "obsidian";
 import type PolyphonPlugin from "./main";
-import { PolyphonClient } from "./PolyphonClient";
+import { PolyphonClient, RpcError } from "@polyphon-ai/js";
 import { ConversationView } from "./ConversationView";
 import { parseMention } from "./parseMention";
 import type { Composition, ConductorProfile, Session, ConnectionStatus, Voice } from "./types";
@@ -349,7 +349,7 @@ export class PolyphonSidebarView extends ItemView {
       }
     } catch (err: unknown) {
       // Auth failure (wrong token) — don't retry, user needs to fix their token
-      const errCode = err instanceof Error && "code" in err ? (err as Error & { code: number }).code : undefined;
+      const errCode = err instanceof RpcError ? err.code : undefined;
       const errMsg = err instanceof Error ? err.message : "";
       if (errCode === -32001 || errMsg.includes("Unauthorized")) {
         this.suppressDisconnectHandler = true;
@@ -364,7 +364,11 @@ export class PolyphonSidebarView extends ItemView {
 
   private async loadCompositions(): Promise<void> {
     try {
-      this.compositions = await this.client.compositions();
+      const comps = await this.client.compositions();
+      this.compositions = comps.map((c) => ({
+        ...c,
+        voices: c.voices.map((v, i) => ({ ...v, side: (i % 2 === 0 ? "left" : "right") as "left" | "right" })),
+      }));
       this.populateCompositionSelect();
     } catch {
       new Notice("Polyphon: failed to load compositions.");
@@ -395,7 +399,8 @@ export class PolyphonSidebarView extends ItemView {
   private async loadSessions(compositionId: string): Promise<void> {
     if (!this.sessionSelect || !this.sessionRow) return;
     try {
-      const sessions = await this.client.sessions(compositionId);
+      const all = await this.client.sessions();
+      const sessions = all.filter((s) => s.compositionId === compositionId);
       this.sessionSelect.empty();
       this.sessionSelect.createEl("option", { text: "— resume a session —", attr: { value: "" } });
       const sorted = sessions
@@ -421,7 +426,7 @@ export class PolyphonSidebarView extends ItemView {
 
   private async resumeSession(sessionId: string): Promise<void> {
     try {
-      const session = await this.client.getSession(sessionId);
+      const session = await this.client.getSession({ id: sessionId });
       this.activeSession = session;
       this.lastSentFilePath = null;
       // Ensure activeComposition is set — may not be if session was resumed directly
@@ -429,7 +434,7 @@ export class PolyphonSidebarView extends ItemView {
         this.activeComposition = this.compositions.find((c) => c.id === session.compositionId) ?? this.activeComposition;
       }
       this.conversationView?.clear();
-      const messages = await this.client.sessionMessages(sessionId);
+      const messages = await this.client.getMessages({ sessionId });
       for (const msg of messages) {
         if (msg.role === "conductor") {
           this.conversationView?.appendUserMessage(msg.content);
@@ -462,7 +467,7 @@ export class PolyphonSidebarView extends ItemView {
       const vaultName = this.app.vault.getName();
       const date = new Date().toLocaleDateString(undefined, { month: "short", day: "numeric" });
       const name = `${vaultName} · ${date}`;
-      const session = await this.client.createSession(compositionId, name, vaultPath);
+      const session = await this.client.createSession(compositionId, "obsidian", { name, workingDir: vaultPath ?? null });
       this.activeSession = session;
       this.lastSentFilePath = null;
       this.conversationView?.clear();
@@ -567,7 +572,7 @@ export class PolyphonSidebarView extends ItemView {
       : undefined;
 
     try {
-      await this.client.broadcast(this.activeSession.id, messageContent, onChunk);
+      await this.client.broadcast({ sessionId: this.activeSession.id, content: messageContent }, onChunk);
     } catch (err) {
       new Notice("Polyphon: failed to send message.");
       if (this.plugin.settings.debugMode) console.error("[Polyphon]", err);
