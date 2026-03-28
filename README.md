@@ -1,6 +1,6 @@
 # Polyphon for Obsidian
 
-[![CI](https://github.com/polyphon-ai/obsidian-polyphon/actions/workflows/ci.yml/badge.svg)](https://github.com/polyphon-ai/obsidian-polyphon/actions/workflows/ci.yml) [![GitHub release](https://img.shields.io/github/v/release/polyphon-ai/obsidian-polyphon)](https://github.com/polyphon-ai/obsidian-polyphon/releases/latest) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![Follow on X](https://img.shields.io/badge/Follow-%40PolyphonAI-000?logo=x&logoColor=white)](https://x.com/PolyphonAI)
+[![CI](https://github.com/polyphon-ai/obsidian-polyphon/actions/workflows/ci.yml/badge.svg)](https://github.com/polyphon-ai/obsidian-polyphon/actions/workflows/ci.yml) [![GitHub release](https://img.shields.io/github/v/release/polyphon-ai/obsidian-polyphon)](https://github.com/polyphon-ai/obsidian-polyphon/releases/latest) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![Follow on X](https://img.shields.io/badge/Follow-%40PolyphonAI-000?logo=x&logoColor=white)](https://x.com/intent/follow?screen_name=PolyphonAI)
 
 An Obsidian plugin that connects to a running [Polyphon](https://polyphon.ai) instance, letting you have multi-voice AI conversations from within your vault.
 
