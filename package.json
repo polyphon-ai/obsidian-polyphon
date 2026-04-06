@@ -26,7 +26,7 @@
     "@polyphon-ai/js": "^0.13.1"
   },
   "devDependencies": {
-    "@types/node": "^25.4.0",
+    "@types/node": "^25.5.2",
     "@typescript-eslint/eslint-plugin": "^8.57.0",
     "@typescript-eslint/parser": "^8.57.0",
     "builtin-modules": "^5.0.0",
