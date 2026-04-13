@@ -28,7 +28,7 @@ jobs:
         run: npm run build
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           # Draft and pre-release must both be false for Obsidian to pick up the release.
           draft: false
